@@ -56,7 +56,8 @@ export class FetchData extends Component {
                         </div>
                         <div>
                             {amalgamatedStory.stories.map(story =>
-                                <a href={story.storyUrl}>{story.title}</a>
+                                
+                                <a href={story.storyUrl}>{story.title}<br></br></a>
                             )}
                         </div>
                     </div>
