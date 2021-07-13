@@ -8,35 +8,29 @@ using Microsoft.Extensions.Logging;
 
 namespace react_news_app.Controllers
 {
-    [ApiController]
     [Route("[controller]")]
     public class StoriesController : ControllerBase
     {
+
         [HttpGet]
         public IEnumerable<AmalgamatedStory> Get()
         {
-            XmlDocument doc = new XmlDocument();
-            doc.Load("https://www.theguardian.com/world/rss");
-            XmlNodeList rssNodes = doc.SelectNodes("rss/channel/item");
-            List<NewsStory> guardianNewsList = new List<NewsStory>();
-            foreach(XmlNode node in rssNodes)
-            {
-                NewsStory story = new NewsStory { 
-                    Title = node.SelectSingleNode("title").InnerText,
-                    Description = node.SelectSingleNode("description").InnerText,
-                    Date = DateTime.Now,
-                    StoryUrl = node.SelectSingleNode("link").InnerText,
-                    ImageUrl = "image url",
-                };
-                guardianNewsList.Add(story);
-            }
+            List<NewsStory> guardianNewsList = getStories("https://www.theguardian.com/world/rss");
+            List<NewsStory> bbcNewsList = getStories("http://feeds.bbci.co.uk/news/rss.xml");
+            List<AmalgamatedStory> amalgamatedStories = new List<AmalgamatedStory>();
 
-            XmlDocument bbcdoc = new XmlDocument();
-            doc.Load("http://feeds.bbci.co.uk/news/rss.xml");
-            XmlNodeList bbcrssNodes = doc.SelectNodes("rss/channel/item");
-            List<NewsStory> bbcNewsList = new List<NewsStory>();
-            Console.WriteLine(bbcrssNodes.Count);
-            foreach (XmlNode node in bbcrssNodes)
+            amalgamatedStories = amalgamateStories(amalgamatedStories, bbcNewsList);
+            amalgamatedStories = amalgamateStories(amalgamatedStories, guardianNewsList);
+            return amalgamatedStories.ToArray();
+        }
+
+        public List<NewsStory> getStories(string Url)
+        {
+            XmlDocument doc = new XmlDocument();
+            doc.Load(Url);
+            XmlNodeList rssNodes = doc.SelectNodes("rss/channel/item");
+            List<NewsStory> newsList = new List<NewsStory>();
+            foreach (XmlNode node in rssNodes)
             {
                 NewsStory story = new NewsStory
                 {
@@ -46,41 +40,38 @@ namespace react_news_app.Controllers
                     StoryUrl = node.SelectSingleNode("link").InnerText,
                     ImageUrl = "image url",
                 };
-                bbcNewsList.Add(story);
+                newsList.Add(story);
             }
+            return newsList;
+        }
 
-            List<AmalgamatedStory> amalgamatedStories = new List<AmalgamatedStory>();
-            foreach(NewsStory story in bbcNewsList)
+        public List<AmalgamatedStory> amalgamateStories(List<AmalgamatedStory> alreadyAmalgamatedStories, List<NewsStory> storiesToAmalgamate)
+        {
+            Console.WriteLine("cringe");
+            List<AmalgamatedStory> amalgamatedStories = alreadyAmalgamatedStories;
+            foreach (NewsStory story in storiesToAmalgamate)
             {
-                AmalgamatedStory amalgamatedStory = new AmalgamatedStory
-                {
-                    MasterDescription = story.Description,
-                    MasterTitle = story.Title,
-                    MasterStoryUrl = story.StoryUrl
-                };
-                amalgamatedStories.Add(amalgamatedStory);
-            }
-
-            foreach(NewsStory story in guardianNewsList)
-            {
-                bool addNewStory = false;
-                foreach(AmalgamatedStory amalgamatedStory in amalgamatedStories)
+                bool addNewStory = alreadyAmalgamatedStories.Count < 1;
+                Console.WriteLine(addNewStory);
+                foreach (AmalgamatedStory amalgamatedStory in amalgamatedStories)
                 {
                     string[] storyTitle = story.Title.Split(" ");
                     string[] amalgamatedTitle = amalgamatedStory.MasterTitle.Split(" ");
-                    
+
                     int titleMatches = 0;
-                    foreach(string word in amalgamatedTitle)
+                    foreach (string word in amalgamatedTitle)
                     {
                         int indexNormal = Array.FindIndex(storyTitle, x => x == word);
-                        int indexLower = Array.FindIndex(storyTitle, x => x.ToLower() == word.ToLower());
-                        if (word.Any(char.IsUpper)){
-
+                        int indexLower = Array.FindIndex(storyTitle, x => x.ToLower().Trim(new char[] {'"', '\'' }) == word.ToLower().Trim(new char[] { '"', '\'' }));
+                        if (word.Any(char.IsUpper))
+                        {
+                            // Add extra matches if there is capitalised words and they match
+                            // The idea being that places and names are capitalised 
                         }
                         // The word exists in the array
                         if (indexNormal > -1 || indexLower > -1)
                         {
-                            if(word.Length >= 4)
+                            if (word.Length >= 4)
                             {
 
                                 titleMatches++;
@@ -97,6 +88,7 @@ namespace react_news_app.Controllers
                     else
                     {
                         addNewStory = true;
+                        Console.WriteLine("add");
                     }
                 }
                 if (addNewStory)
@@ -111,8 +103,8 @@ namespace react_news_app.Controllers
                     addNewStory = false;
                 }
             }
-            Console.WriteLine(amalgamatedStories);
-            return amalgamatedStories.ToArray();
+            return amalgamatedStories;
         }
     }
 }
+
