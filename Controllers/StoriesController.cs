@@ -47,12 +47,12 @@ namespace react_news_app.Controllers
 
         public List<AmalgamatedStory> amalgamateStories(List<AmalgamatedStory> alreadyAmalgamatedStories, List<NewsStory> storiesToAmalgamate)
         {
-            Console.WriteLine("cringe");
+            
             List<AmalgamatedStory> amalgamatedStories = alreadyAmalgamatedStories;
             foreach (NewsStory story in storiesToAmalgamate)
             {
-                bool addNewStory = alreadyAmalgamatedStories.Count < 1;
-                Console.WriteLine(addNewStory);
+                int highestMatches = 0;
+                AmalgamatedStory highestMatchingStory = null;    
                 foreach (AmalgamatedStory amalgamatedStory in amalgamatedStories)
                 {
                     string[] storyTitle = story.Title.Split(" ");
@@ -61,37 +61,34 @@ namespace react_news_app.Controllers
                     int titleMatches = 0;
                     foreach (string word in amalgamatedTitle)
                     {
-                        int indexNormal = Array.FindIndex(storyTitle, x => x == word);
+                        int indexNormal = -1;
                         int indexLower = Array.FindIndex(storyTitle, x => x.ToLower().Trim(new char[] {'"', '\'' }) == word.ToLower().Trim(new char[] { '"', '\'' }));
                         if (word.Any(char.IsUpper))
                         {
-                            // Add extra matches if there is capitalised words and they match
-                            // The idea being that places and names are capitalised 
+                            indexNormal = Array.FindIndex(storyTitle, x => x == word);
                         }
                         // The word exists in the array
-                        if (indexNormal > -1 || indexLower > -1)
+                        if (indexLower > -1)
                         {
                             if (word.Length >= 4)
                             {
-
-                                titleMatches++;
+                                titleMatches += indexNormal > -1 ? 3 : 1;
                             }
                         }
                     }
-                    if (titleMatches >= 2)
+                    if (titleMatches >= 4 && titleMatches > highestMatches) 
                     {
-                        amalgamatedStory.Stories.Add(story);
-                        amalgamatedStory.numberOfStories = amalgamatedStory.Stories.Count();
-                        addNewStory = false;
-                        break;
-                    }
-                    else
-                    {
-                        addNewStory = true;
-                        Console.WriteLine("add");
+                        Console.WriteLine("old: {0}, new:{1}",highestMatches,titleMatches);
+                        highestMatchingStory = amalgamatedStory;
+                        highestMatches = titleMatches;
                     }
                 }
-                if (addNewStory)
+                if(highestMatchingStory != null)
+                {
+                    highestMatchingStory.Stories.Add(story);
+                    highestMatchingStory.numberOfStories = highestMatchingStory.Stories.Count();
+                }
+                else
                 {
                     AmalgamatedStory newAmalgamatedStory = new AmalgamatedStory
                     {
@@ -100,7 +97,6 @@ namespace react_news_app.Controllers
                         MasterStoryUrl = story.StoryUrl
                     };
                     amalgamatedStories.Add(newAmalgamatedStory);
-                    addNewStory = false;
                 }
             }
             return amalgamatedStories;
