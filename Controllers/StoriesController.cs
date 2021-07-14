@@ -1,10 +1,8 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Xml;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
 namespace react_news_app.Controllers
 {
@@ -21,6 +19,7 @@ namespace react_news_app.Controllers
 
             amalgamatedStories = amalgamateStories(amalgamatedStories, bbcNewsList);
             amalgamatedStories = amalgamateStories(amalgamatedStories, guardianNewsList);
+
             return amalgamatedStories.ToArray();
         }
 
@@ -47,40 +46,56 @@ namespace react_news_app.Controllers
 
         public List<AmalgamatedStory> amalgamateStories(List<AmalgamatedStory> alreadyAmalgamatedStories, List<NewsStory> storiesToAmalgamate)
         {
-            
+            char[] charactersToTrim = new char[] { '"', '\'', '-', '?', '!', '`', };
             List<AmalgamatedStory> amalgamatedStories = alreadyAmalgamatedStories;
             foreach (NewsStory story in storiesToAmalgamate)
             {
-                int highestMatches = 0;
-                AmalgamatedStory highestMatchingStory = null;    
+                int highestMatchScore = 0;
+                AmalgamatedStory highestMatchingStory = null;
                 foreach (AmalgamatedStory amalgamatedStory in amalgamatedStories)
                 {
-                    string[] storyTitle = story.Title.Split(" ");
+                    string[] storyTitle = story.Title.Split(" ");   
+                    string[] storyDescription = story.Description.Split(" ");
                     string[] amalgamatedTitle = amalgamatedStory.MasterTitle.Split(" ");
+                    string[] missing = storyTitle.Except(amalgamatedTitle).Concat(amalgamatedTitle.Except(storyTitle)).ToArray();
+                    int matchScore = 0;
 
-                    int titleMatches = 0;
                     foreach (string word in amalgamatedTitle)
                     {
-                        int indexNormal = -1;
-                        int indexLower = Array.FindIndex(storyTitle, x => x.ToLower().Trim(new char[] {'"', '\'' }) == word.ToLower().Trim(new char[] { '"', '\'' }));
-                        if (word.Any(char.IsUpper))
+                        if(word.Length < 4)
                         {
-                            indexNormal = Array.FindIndex(storyTitle, x => x == word);
+                            continue;
                         }
-                        // The word exists in the array
-                        if (indexLower > -1)
+                        int indexTitleCaseSensitive = -1; // No match by default
+                        int indexTitleLowercase = Array.FindIndex(storyTitle, x => x.ToLower().Trim(charactersToTrim) == word.ToLower().Trim(charactersToTrim));
+                        int indexDescription = Array.FindIndex(storyDescription, x => x.ToLower().Trim(charactersToTrim) == word.ToLower().Trim(charactersToTrim));
+                        bool wordContainsCapitals = word.Any(char.IsUpper);
+                        if (wordContainsCapitals)
                         {
-                            if (word.Length >= 4)
-                            {
-                                titleMatches += indexNormal > -1 ? 3 : 1;
-                            }
+                            indexTitleCaseSensitive = Array.FindIndex(storyTitle, x => x == word);
+                        }
+                        // The word exists in the title
+                        if (indexTitleLowercase > -1)
+                        {
+                                matchScore += indexTitleCaseSensitive > -1 ? word.Length : (word.Length / 2 );
+                        }
+                        // The word exists in the description
+                        else if(indexDescription > -1)
+                        {
+                            matchScore += word.Length / 2;
+                        }
+                        else
+                        {
+                            matchScore -= wordContainsCapitals ? 2 : 1;
                         }
                     }
-                    if (titleMatches >= 4 && titleMatches > highestMatches) 
+                    int divisor = 4;
+                    int defaultMatchMin = 3;
+                    int matchMinimum = (storyTitle.Count() / divisor) >= defaultMatchMin ? storyTitle.Count() / divisor : defaultMatchMin;
+                    if (matchScore >= matchMinimum && matchScore > highestMatchScore) 
                     {
-                        Console.WriteLine("old: {0}, new:{1}",highestMatches,titleMatches);
                         highestMatchingStory = amalgamatedStory;
-                        highestMatches = titleMatches;
+                        highestMatchScore = matchScore;
                     }
                 }
                 if(highestMatchingStory != null)
