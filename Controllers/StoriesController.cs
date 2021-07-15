@@ -15,11 +15,12 @@ namespace react_news_app.Controllers
         {
             List<NewsStory> guardianNewsList = getStories("https://www.theguardian.com/world/rss");
             List<NewsStory> bbcNewsList = getStories("http://feeds.bbci.co.uk/news/rss.xml");
+            List<NewsStory> dailyMailList = getStories("https://www.dailymail.co.uk/news/index.rss");
             List<AmalgamatedStory> amalgamatedStories = new List<AmalgamatedStory>();
 
             amalgamatedStories = amalgamateStories(amalgamatedStories, bbcNewsList);
             amalgamatedStories = amalgamateStories(amalgamatedStories, guardianNewsList);
-            
+            amalgamatedStories = amalgamateStories(amalgamatedStories, dailyMailList);
             return amalgamatedStories.ToArray();
         }
 
