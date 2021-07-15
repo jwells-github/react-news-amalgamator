@@ -19,7 +19,7 @@ namespace react_news_app.Controllers
 
             amalgamatedStories = amalgamateStories(amalgamatedStories, bbcNewsList);
             amalgamatedStories = amalgamateStories(amalgamatedStories, guardianNewsList);
-
+            
             return amalgamatedStories.ToArray();
         }
 
@@ -86,7 +86,7 @@ namespace react_news_app.Controllers
                         }
                         else
                         {
-                            matchScore -= wordContainsCapitals ? 2 : 1;
+                            matchScore -= wordContainsCapitals ? word.Length : 1;
                         }
                     }
                     int divisor = 4;
