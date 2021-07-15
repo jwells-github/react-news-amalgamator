@@ -28,28 +28,36 @@ namespace react_news_app.Controllers
 
         public List<NewsStory> getStories(string Url)
         {
-            XmlDocument doc = new XmlDocument();
-            doc.Load(Url);
-            XmlNodeList rssNodes = doc.SelectNodes("rss/channel/item");
             List<NewsStory> newsList = new List<NewsStory>();
-            foreach (XmlNode node in rssNodes)
+            try
             {
-                string title = node.SelectSingleNode("title") == null ? null : node.SelectSingleNode("title").InnerText;
-                string description = node.SelectSingleNode("description") == null ? "" : node.SelectSingleNode("description").InnerText;
-                string storyUrl = node.SelectSingleNode("link") == null ? null : node.SelectSingleNode("link").InnerText;
-                if (title == null || storyUrl == null)
+                XmlDocument doc = new XmlDocument();
+                doc.Load(Url);
+                XmlNodeList rssNodes = doc.SelectNodes("rss/channel/item");
+
+                foreach (XmlNode node in rssNodes)
                 {
-                    continue;
+                    string title = node.SelectSingleNode("title") == null ? null : node.SelectSingleNode("title").InnerText;
+                    string description = node.SelectSingleNode("description") == null ? "" : node.SelectSingleNode("description").InnerText;
+                    string storyUrl = node.SelectSingleNode("link") == null ? null : node.SelectSingleNode("link").InnerText;
+                    if (title == null || storyUrl == null)
+                    {
+                        continue;
+                    }
+                    NewsStory story = new NewsStory
+                    {
+                        Title = title,
+                        Description = description,
+                        Date = DateTime.Now,
+                        StoryUrl = storyUrl,
+                        ImageUrl = "image url",
+                    };
+                    newsList.Add(story);
                 }
-                NewsStory story = new NewsStory
-                {
-                    Title = title,
-                    Description = description,
-                    Date = DateTime.Now,
-                    StoryUrl = storyUrl,
-                    ImageUrl = "image url",
-                };
-                newsList.Add(story);
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine("Failed to load stories for {0}", Url);
             }
             return newsList;
         }
