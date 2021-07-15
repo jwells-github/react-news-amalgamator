@@ -10,7 +10,8 @@ export class FetchData extends Component {
 
   componentDidMount() {
     this.populateWeatherData();
-  }
+    }
+
 
   static renderForecastsTable(forecasts) {
     return (
@@ -51,7 +52,7 @@ export class FetchData extends Component {
                                 <h2>
                                     <a href={amalgamatedStory.masterStoryUrl}>{amalgamatedStory.masterTitle}</a>
                                 </h2>
-                                <p>{amalgamatedStory.masterDescription}</p>
+                                <p dangerouslySetInnerHTML={{ __html: amalgamatedStory.masterDescription }}></p>
                             </div>
                         </div>
                         <div>
