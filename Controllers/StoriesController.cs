@@ -16,11 +16,13 @@ namespace react_news_app.Controllers
             List<NewsStory> guardianNewsList = getStories("https://www.theguardian.com/world/rss");
             List<NewsStory> bbcNewsList = getStories("http://feeds.bbci.co.uk/news/rss.xml");
             List<NewsStory> dailyMailList = getStories("https://www.dailymail.co.uk/news/index.rss");
+            List<NewsStory> telegraphList = getStories("https://www.telegraph.co.uk/news/rss.xml");
             List<AmalgamatedStory> amalgamatedStories = new List<AmalgamatedStory>();
 
             amalgamatedStories = amalgamateStories(amalgamatedStories, bbcNewsList);
             amalgamatedStories = amalgamateStories(amalgamatedStories, guardianNewsList);
             amalgamatedStories = amalgamateStories(amalgamatedStories, dailyMailList);
+            amalgamatedStories = amalgamateStories(amalgamatedStories, telegraphList);
             return amalgamatedStories.ToArray();
         }
 
@@ -32,12 +34,19 @@ namespace react_news_app.Controllers
             List<NewsStory> newsList = new List<NewsStory>();
             foreach (XmlNode node in rssNodes)
             {
+                string title = node.SelectSingleNode("title") == null ? null : node.SelectSingleNode("title").InnerText;
+                string description = node.SelectSingleNode("description") == null ? "" : node.SelectSingleNode("description").InnerText;
+                string storyUrl = node.SelectSingleNode("link") == null ? null : node.SelectSingleNode("link").InnerText;
+                if (title == null || storyUrl == null)
+                {
+                    continue;
+                }
                 NewsStory story = new NewsStory
                 {
-                    Title = node.SelectSingleNode("title").InnerText,
-                    Description = node.SelectSingleNode("description").InnerText,
+                    Title = title,
+                    Description = description,
                     Date = DateTime.Now,
-                    StoryUrl = node.SelectSingleNode("link").InnerText,
+                    StoryUrl = storyUrl,
                     ImageUrl = "image url",
                 };
                 newsList.Add(story);
