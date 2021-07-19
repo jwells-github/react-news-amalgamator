@@ -13,12 +13,11 @@ namespace react_news_app.Controllers
         [HttpGet]
         public IEnumerable<AmalgamatedStory> Get()
         {
-            List<NewsStory> guardianNewsList = getStories("https://www.theguardian.com/world/rss");
-            List<NewsStory> bbcNewsList = getStories("http://feeds.bbci.co.uk/news/rss.xml");
-            List<NewsStory> dailyMailList = getStories("https://www.dailymail.co.uk/news/index.rss");
-            List<NewsStory> telegraphList = getStories("https://www.telegraph.co.uk/news/rss.xml");
+            List<NewsStory> guardianNewsList = getStories(NewsFeeds.THE_GUARDIAN_FEED);
+            List<NewsStory> bbcNewsList = getStories(NewsFeeds.BBC_NEWS_FEED);
+            List<NewsStory> dailyMailList = getStories(NewsFeeds.DAILY_MAIL_FEED);
+            List<NewsStory> telegraphList = getStories(NewsFeeds.THE_TELEGRAPH_FEED);
             List<AmalgamatedStory> amalgamatedStories = new List<AmalgamatedStory>();
-
             amalgamatedStories = amalgamateStories(amalgamatedStories, bbcNewsList);
             amalgamatedStories = amalgamateStories(amalgamatedStories, guardianNewsList);
             amalgamatedStories = amalgamateStories(amalgamatedStories, dailyMailList);
@@ -51,6 +50,7 @@ namespace react_news_app.Controllers
                         Date = DateTime.Now,
                         StoryUrl = storyUrl,
                         ImageUrl = "image url",
+                        Provider = NewsStory.getProviderFromFeed(Url)
                     };
                     newsList.Add(story);
                 }
