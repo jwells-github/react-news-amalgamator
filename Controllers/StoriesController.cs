@@ -129,6 +129,7 @@ namespace react_news_app.Controllers
                         MasterTitle = story.Title,
                         MasterStoryUrl = story.StoryUrl
                     };
+                    newAmalgamatedStory.Stories.Add(story);
                     amalgamatedStories.Add(newAmalgamatedStory);
                 }
             }

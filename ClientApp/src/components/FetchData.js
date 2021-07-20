@@ -1,44 +1,22 @@
 import React, { Component } from 'react';
 
 export class FetchData extends Component {
-  static displayName = FetchData.name;
-
+    static displayName = FetchData.name;
+    static Provider = {
+        NOT_SET: 0,
+        THE_GUARDIAN: 1,
+        BBC_NEWS: 2,
+        DAILY_MAIL: 3,
+        THE_TELEGRAPH: 4
+    };
   constructor(props) {
     super(props);
-    this.state = { forecasts: [], loading: true };
+      this.state = { forecasts: [], loading: true, provider: 1, filteredStories:[] };
   }
 
   componentDidMount() {
     this.populateWeatherData();
-    }
-
-
-  static renderForecastsTable(forecasts) {
-    return (
-      <table className='table table-striped' aria-labelledby="tabelLabel">
-        <thead>
-          <tr>
-            <th>Title</th>
-            <th>Descrption</th>
-            <th>Date</th>
-          </tr>
-        </thead>
-        <tbody>
-          {forecasts.map(forecast =>
-             <tr key={forecast.date}>
-                <td><a href={forecast.masterStoryUrl}>{forecast.masterTitle}</a></td>
-                <td>{forecast.masterDescription}</td>
-                <td>{forecast.numberOfStories}</td>
-                {forecast.stories.map(story =>
-                    <td><a href={story.storyUrl}>{story.title}</a></td>
-                )}
-            </tr>
-          )}
-        </tbody>
-      </table>
-    );
-  }
-
+    }   
     static renderStories(amalgamatedStories) {
         return (
             <div>
@@ -50,20 +28,18 @@ export class FetchData extends Component {
                             </div>
                             <div>
                                 <h2>
-                                    <a href={amalgamatedStory.masterStoryUrl}>{amalgamatedStory.masterTitle}</a>
+                                    <a href={amalgamatedStory.mainStory.storyUrl}>{amalgamatedStory.mainStory.title}</a>
                                 </h2>
-                                <p dangerouslySetInnerHTML={{ __html: amalgamatedStory.masterDescription }}></p>
+                                <p dangerouslySetInnerHTML={{ __html: amalgamatedStory.mainStory.description }}></p>
                             </div>
                         </div>
                         <div>
-                            {amalgamatedStory.stories.map(story =>
-                                
+                            {amalgamatedStory.childStories.map(story =>
                                 <a href={story.storyUrl}>{story.title}<br></br></a>
                             )}
                         </div>
                     </div>
                     )}
-                
             </div>
         )
     }
@@ -71,21 +47,38 @@ export class FetchData extends Component {
   render() {
     let contents = this.state.loading
         ? <p><em>Loading...</em></p>
-        : FetchData.renderStories(this.state.forecasts);
+        : FetchData.renderStories(this.state.filteredStories);
         
-    return (
-      <div>
-        <h1>Weather forecast</h1>
-        <p>This component demonstrates fetching data from the server.</p>
-        {contents}
-      </div>
+      return (
+        <div>
+            <h1>Weather forecast</h1>
+            <p>This component demonstrates fetching data from the server.</p>
+            {contents}
+        </div>
     );
   }
 
   async populateWeatherData() {
     const response = await fetch('stories');
     const data = await response.json();
-    this.setState({ forecasts: data, loading: false });
-    console.log(data);
+    let filteredStories = [];
+    data.map(amalgamatedStory => {
+        let mainStory;
+        let childStories = [];
+        amalgamatedStory.stories.map(story => {
+            if (story.provider === this.state.provider) {
+                mainStory = story
+            }
+            else {
+                childStories.push(story)
+            }
+        })
+        if (mainStory === undefined) {
+            mainStory = childStories[0];
+            childStories.shift();
+        }
+        filteredStories.push({ mainStory: mainStory, childStories: childStories });
+    })
+    this.setState({ forecasts: data, loading: false, filteredStories: filteredStories });
   }
 }
