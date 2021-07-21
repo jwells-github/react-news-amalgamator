@@ -39,6 +39,7 @@ namespace react_news_app.Controllers
                     string title = node.SelectSingleNode("title") == null ? null : node.SelectSingleNode("title").InnerText;
                     string description = node.SelectSingleNode("description") == null ? "" : node.SelectSingleNode("description").InnerText;
                     string storyUrl = node.SelectSingleNode("link") == null ? null : node.SelectSingleNode("link").InnerText;
+                    Provider provider = NewsStory.getProviderFromFeed(Url);
                     if (title == null || storyUrl == null)
                     {
                         continue;
@@ -50,7 +51,8 @@ namespace react_news_app.Controllers
                         Date = DateTime.Now,
                         StoryUrl = storyUrl,
                         ImageUrl = "image url",
-                        Provider = NewsStory.getProviderFromFeed(Url)
+                        Provider = provider,
+                        ProviderName = NewsStory.getProviderName(provider)
                     };
                     newsList.Add(story);
                 }
