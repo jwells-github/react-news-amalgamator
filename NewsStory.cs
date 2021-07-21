@@ -11,6 +11,8 @@ namespace react_news_app
         public string ImageUrl { get; set; }
         public Provider Provider { get; set; }
 
+        public string ProviderName { get; set; }
+
         public static Provider getProviderFromFeed(string feed)
         {
 
@@ -29,7 +31,25 @@ namespace react_news_app
 
             }
         }
+        public static string getProviderName(Provider provider)
+        {
+            switch (provider)
+            {
+                case Provider.THE_GUARDIAN:
+                    return "The Guardian";
+                case Provider.BBC_NEWS:
+                    return "BBC News";
+                case Provider.DAILY_MAIL:
+                    return "Daily Mail Online";
+                case Provider.THE_TELEGRAPH:
+                    return "The Telegraph";
+                default:
+                    return "";
+            }
+        }
     }   
+
+
 
     public enum Provider
     {
