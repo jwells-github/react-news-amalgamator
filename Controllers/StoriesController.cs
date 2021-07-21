@@ -22,6 +22,7 @@ namespace react_news_app.Controllers
             amalgamatedStories = amalgamateStories(amalgamatedStories, guardianNewsList);
             amalgamatedStories = amalgamateStories(amalgamatedStories, dailyMailList);
             amalgamatedStories = amalgamateStories(amalgamatedStories, telegraphList);
+            amalgamatedStories = amalgamatedStories.OrderByDescending(x => x.numberOfStories).ToList();
             return amalgamatedStories.ToArray();
         }
 
