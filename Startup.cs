@@ -22,7 +22,7 @@ namespace react_news_app
         {
 
             services.AddControllersWithViews();
-
+            services.AddMemoryCache();
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
             {

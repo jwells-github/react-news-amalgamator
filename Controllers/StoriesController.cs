@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,14 +10,34 @@ namespace react_news_app.Controllers
     [Route("[controller]")]
     public class StoriesController : ControllerBase
     {
+        private const string StoriesCacheKey = "CACHED_STORIES";
+        private TimeSpan CacheExpiryTime = TimeSpan.FromMinutes(3);
+        private IMemoryCache _cache;
+
+        public StoriesController(IMemoryCache memoryCache)
+        {
+            _cache = memoryCache;
+        }
 
         [HttpGet]
         public IEnumerable<AmalgamatedStory> Get()
         {
-            List<NewsStory> guardianNewsList = getStories(NewsFeeds.THE_GUARDIAN_FEED);
-            List<NewsStory> bbcNewsList = getStories(NewsFeeds.BBC_NEWS_FEED);
-            List<NewsStory> dailyMailList = getStories(NewsFeeds.DAILY_MAIL_FEED);
-            List<NewsStory> telegraphList = getStories(NewsFeeds.THE_TELEGRAPH_FEED);
+            if (_cache.TryGetValue(StoriesCacheKey, out IEnumerable<AmalgamatedStory> cachedAmalgamatedStories))
+            {
+                return cachedAmalgamatedStories;
+            }
+            IEnumerable<AmalgamatedStory> amalgamtedStories = getAmalgamtedStories();
+            _cache.Set(StoriesCacheKey, amalgamtedStories, CacheExpiryTime);
+            return amalgamtedStories;
+        }
+
+
+        public IEnumerable<AmalgamatedStory> getAmalgamtedStories()
+        {
+            List<NewsStory> guardianNewsList = getStoriesFromFeed(NewsFeeds.THE_GUARDIAN_FEED);
+            List<NewsStory> bbcNewsList = getStoriesFromFeed(NewsFeeds.BBC_NEWS_FEED);
+            List<NewsStory> dailyMailList = getStoriesFromFeed(NewsFeeds.DAILY_MAIL_FEED);
+            List<NewsStory> telegraphList = getStoriesFromFeed(NewsFeeds.THE_TELEGRAPH_FEED);
             List<AmalgamatedStory> amalgamatedStories = new List<AmalgamatedStory>();
             amalgamatedStories = amalgamateStories(amalgamatedStories, bbcNewsList);
             amalgamatedStories = amalgamateStories(amalgamatedStories, guardianNewsList);
@@ -26,7 +47,7 @@ namespace react_news_app.Controllers
             return amalgamatedStories.ToArray();
         }
 
-        public List<NewsStory> getStories(string Url)
+        public List<NewsStory> getStoriesFromFeed(string Url)
         {
             List<NewsStory> newsList = new List<NewsStory>();
             try
