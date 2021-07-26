@@ -88,7 +88,7 @@ namespace react_news_app.Controllers
 
         public List<AmalgamatedStory> amalgamateStories(List<AmalgamatedStory> alreadyAmalgamatedStories, List<NewsStory> storiesToAmalgamate)
         {
-            char[] charactersToTrim = new char[] { '"', '\'', '-', '?', '!', '`', };
+            char[] charactersToTrim = new char[] { '"', '\'', '-', '?', '!', '`', ',', '.' };
             List<AmalgamatedStory> amalgamatedStories = alreadyAmalgamatedStories;
             foreach (NewsStory story in storiesToAmalgamate)
             {
@@ -100,18 +100,22 @@ namespace react_news_app.Controllers
                     string[] storyDescription = story.Description.Split(" ");
                     string[] amalgamatedTitle = amalgamatedStory.MasterTitle.Split(" ");
                     string[] missing = storyTitle.Except(amalgamatedTitle).Concat(amalgamatedTitle.Except(storyTitle)).ToArray();
+                    bool previousWordWasCapitalAndMatched = false;
                     int matchScore = 0;
-
-                    foreach (string word in amalgamatedTitle)
+                    int divisor = 4;
+                    int defaultMatchMin = 4;
+                    int matchMinimum = (storyTitle.Count() / divisor) >= defaultMatchMin ? storyTitle.Count() / divisor : defaultMatchMin;
+                    foreach (string word in amalgamatedTitle)   
                     {
-                        if(word.Length < 4)
+                        bool wordContainsCapitals = word.Any(char.IsUpper);
+                        if (word.Length < 4 && !wordContainsCapitals)
                         {
                             continue;
                         }
                         int indexTitleCaseSensitive = -1; // No match by default
                         int indexTitleLowercase = Array.FindIndex(storyTitle, x => x.ToLower().Trim(charactersToTrim) == word.ToLower().Trim(charactersToTrim));
                         int indexDescription = Array.FindIndex(storyDescription, x => x.ToLower().Trim(charactersToTrim) == word.ToLower().Trim(charactersToTrim));
-                        bool wordContainsCapitals = word.Any(char.IsUpper);
+
                         if (wordContainsCapitals)
                         {
                             indexTitleCaseSensitive = Array.FindIndex(storyTitle, x => x == word);
@@ -119,27 +123,29 @@ namespace react_news_app.Controllers
                         // The word exists in the title
                         if (indexTitleLowercase > -1)
                         {
-                                matchScore += indexTitleCaseSensitive > -1 ? word.Length : (word.Length / 2 );
+                            int score = matchMinimum / divisor;
+                            score *= indexTitleCaseSensitive > -1 ? 2 : 1;
+                            score *= previousWordWasCapitalAndMatched ? 2 : 1;
+                            matchScore += score;
+                            previousWordWasCapitalAndMatched = true;
                         }
                         // The word exists in the description
                         else if(indexDescription > -1)
                         {
-                            matchScore += word.Length / 2;
+                            matchScore += matchMinimum / divisor;
                         }
                         else
                         {
-                            matchScore -= wordContainsCapitals ? word.Length : 1;
+                            matchScore -= wordContainsCapitals ? matchMinimum / 2: matchMinimum / divisor;
                         }
                     }
-                    int divisor = 4;
-                    int defaultMatchMin = 3;
-                    int matchMinimum = (storyTitle.Count() / divisor) >= defaultMatchMin ? storyTitle.Count() / divisor : defaultMatchMin;
                     if (matchScore >= matchMinimum && matchScore > highestMatchScore) 
                     {
                         highestMatchingStory = amalgamatedStory;
                         highestMatchScore = matchScore;
                     }
                 }
+                story.highestMatchScore = highestMatchScore;
                 if(highestMatchingStory != null)
                 {
                     highestMatchingStory.Stories.Add(story);
