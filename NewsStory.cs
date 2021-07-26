@@ -13,6 +13,8 @@ namespace react_news_app
 
         public string ProviderName { get; set; }
 
+        public int highestMatchScore { get; set; }
+
         public static Provider getProviderFromFeed(string feed)
         {
 

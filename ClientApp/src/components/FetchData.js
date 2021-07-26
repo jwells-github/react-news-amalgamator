@@ -36,7 +36,8 @@ export class FetchData extends Component {
                         </div>
                         <div>
                             {amalgamatedStory.childStories.map(story => 
-                                <span> {story.providerName} -  <a href={story.storyUrl}>{story.title}</a><br></br></span>
+                                <span> {story.providerName} -  <a href={story.storyUrl}>{story.title}</a> - {story.highestMatchScore}<br></br></span>
+                                
                             )}
                         </div>
                     </div>
