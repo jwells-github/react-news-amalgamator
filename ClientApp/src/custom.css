@@ -16,3 +16,6 @@ code {
 .hidden{
     display:none;
 }
+.story-header {
+    display: flex;
+}

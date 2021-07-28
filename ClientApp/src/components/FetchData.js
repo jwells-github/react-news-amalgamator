@@ -22,7 +22,6 @@ export class FetchData extends Component {
         function toggleChildStories(e) {
             let button = e.target;
             let childStoriesDiv = e.target.nextElementSibling;
-            console.log(button);
             if (childStoriesDiv.classList.contains("hidden")) {
                 button.innerHtml = "Click to hide similiar Stories"
                 childStoriesDiv.classList.remove("hidden");
@@ -33,33 +32,45 @@ export class FetchData extends Component {
             }
         }
         function toggleCompactStory(e) {
-
+            let button = e.target;
+            let storyDetails = e.target.parentElement.nextElementSibling;
+            if (storyDetails.classList.contains("hidden")) {
+                button.innerHtml = "-"
+                storyDetails.classList.remove("hidden");
+            }
+            else {
+                button.innerHtml = "+"
+                storyDetails.classList.add("hidden");
+            }
         }
         return (
             <div>
                 {amalgamatedStories.map(amalgamatedStory =>
                     <div>
-                        <div>
+                        <div className="story-header">
+                            <button onClick={toggleCompactStory}>-</button>
+                            <h2>
+                                <a href={amalgamatedStory.mainStory.storyUrl}>{amalgamatedStory.mainStory.title}</a>
+                            </h2>
+                        </div>
+                        <div className="story-details">
                             <div>
-                                <img/>
-                            </div>
-                            <div>
-                                <h2>
-                                    { amalgamatedStory.mainStory.providerName } - <a href={amalgamatedStory.mainStory.storyUrl}>{amalgamatedStory.mainStory.title}</a>
-                                </h2>
+
+                                <p>Story from {amalgamatedStory.mainStory.providerName}</p>
                                 <p dangerouslySetInnerHTML={{ __html: amalgamatedStory.mainStory.description }}></p>
                             </div>
-                        </div>
-                        <div>
-                            {amalgamatedStory.childStories.length > 0 ? <button onClick={toggleChildStories}>Click to view similiar stories</button> : '' }
-                            <div className="hidden">
-                                {amalgamatedStory.childStories.map(story =>
-                                    <span> {story.providerName} -  <a href={story.storyUrl}>{story.title}</a> - {story.highestMatchScore}<br></br></span>
+                            <div>
+                                {amalgamatedStory.childStories.length > 0 ? <button onClick={toggleChildStories}>Click to view similiar stories</button> : '' }
+                                <div className="hidden">
+                                    {amalgamatedStory.childStories.map(story =>
+                                        <span> {story.providerName} -  <a href={story.storyUrl}>{story.title}</a> - {story.highestMatchScore}<br></br></span>
 
-                                )}
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>
+
                     )}
             </div>
         )
