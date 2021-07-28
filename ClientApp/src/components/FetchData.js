@@ -19,6 +19,22 @@ export class FetchData extends Component {
     }
 
     static renderStories(amalgamatedStories) {
+        function toggleChildStories(e) {
+            let button = e.target;
+            let childStoriesDiv = e.target.nextElementSibling;
+            console.log(button);
+            if (childStoriesDiv.classList.contains("hidden")) {
+                button.innerHtml = "Click to hide similiar Stories"
+                childStoriesDiv.classList.remove("hidden");
+            }
+            else {
+                button.innerHtml = "Click to view similiar Stories"
+                childStoriesDiv.classList.add("hidden");
+            }
+        }
+        function toggleCompactStory(e) {
+
+        }
         return (
             <div>
                 {amalgamatedStories.map(amalgamatedStory =>
@@ -35,10 +51,13 @@ export class FetchData extends Component {
                             </div>
                         </div>
                         <div>
-                            {amalgamatedStory.childStories.map(story => 
-                                <span> {story.providerName} -  <a href={story.storyUrl}>{story.title}</a> - {story.highestMatchScore}<br></br></span>
-                                
-                            )}
+                            {amalgamatedStory.childStories.length > 0 ? <button onClick={toggleChildStories}>Click to view similiar stories</button> : '' }
+                            <div className="hidden">
+                                {amalgamatedStory.childStories.map(story =>
+                                    <span> {story.providerName} -  <a href={story.storyUrl}>{story.title}</a> - {story.highestMatchScore}<br></br></span>
+
+                                )}
+                            </div>
                         </div>
                     </div>
                     )}
