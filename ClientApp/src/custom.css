@@ -16,6 +16,21 @@ code {
 .hidden{
     display:none;
 }
+.story{
+    margin-bottom: 1em;
+}
 .story-header {
     display: flex;
+}
+.story-header button{
+    min-width: 2em;
+    min-height: 2em;
+    align-self: flex-start;
+    margin-top: 7px;
+}
+.story-header h2, .story-details {
+    padding-left: 10px;
+}
+.story-details{
+    margin-left: 2.5em;
 }

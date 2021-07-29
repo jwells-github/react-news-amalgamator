@@ -46,7 +46,7 @@ export class FetchData extends Component {
         return (
             <div>
                 {amalgamatedStories.map(amalgamatedStory =>
-                    <div>
+                    <div className="story">
                         <div className="story-header">
                             <button onClick={toggleCompactStory}>-</button>
                             <h2>
@@ -55,7 +55,6 @@ export class FetchData extends Component {
                         </div>
                         <div className="story-details">
                             <div>
-
                                 <p>Story from {amalgamatedStory.mainStory.providerName}</p>
                                 <p dangerouslySetInnerHTML={{ __html: amalgamatedStory.mainStory.description }}></p>
                             </div>
