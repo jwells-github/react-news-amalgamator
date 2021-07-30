@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { AmalgamatedStory } from './AmalgamatedStory';
 
 export class FetchData extends Component {
     static displayName = FetchData.name;
@@ -19,57 +20,15 @@ export class FetchData extends Component {
     }
 
     static renderStories(amalgamatedStories) {
-        function toggleChildStories(e) {
-            let button = e.target;
-            let childStoriesDiv = e.target.nextElementSibling;
-            if (childStoriesDiv.classList.contains("hidden")) {
-                button.innerHtml = "Click to hide similiar Stories"
-                childStoriesDiv.classList.remove("hidden");
-            }
-            else {
-                button.innerHtml = "Click to view similiar Stories"
-                childStoriesDiv.classList.add("hidden");
-            }
-        }
-        function toggleCompactStory(e) {
-            let button = e.target;
-            let storyDetails = e.target.parentElement.nextElementSibling;
-            if (storyDetails.classList.contains("hidden")) {
-                button.innerHtml = "-"
-                storyDetails.classList.remove("hidden");
-            }
-            else {
-                button.innerHtml = "+"
-                storyDetails.classList.add("hidden");
-            }
-        }
         return (
             <div>
-                {amalgamatedStories.map(amalgamatedStory =>
-                    <div className="story">
-                        <div className="story-header">
-                            <button onClick={toggleCompactStory}>-</button>
-                            <h2>
-                                <a href={amalgamatedStory.mainStory.storyUrl}>{amalgamatedStory.mainStory.title}</a>
-                            </h2>
-                        </div>
-                        <div className="story-details">
-                            <div>
-                                <p>Story from {amalgamatedStory.mainStory.providerName}</p>
-                                <p dangerouslySetInnerHTML={{ __html: amalgamatedStory.mainStory.description }}></p>
-                            </div>
-                            <div>
-                                {amalgamatedStory.childStories.length > 0 ? <button onClick={toggleChildStories}>Click to view similiar stories</button> : '' }
-                                <div className="hidden">
-                                    {amalgamatedStory.childStories.map(story =>
-                                        <span> {story.providerName} -  <a href={story.storyUrl}>{story.title}</a> - {story.highestMatchScore}<br></br></span>
-
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
+                {amalgamatedStories.map((amalgamatedStory, index) =>
+                    <AmalgamatedStory key={index}
+                        storyUrl={amalgamatedStory.mainStory.storyUrl}
+                        title={amalgamatedStory.mainStory.title}
+                        providerName={amalgamatedStory.mainStory.providerName}
+                        description={amalgamatedStory.mainStory.description}
+                        childStories={amalgamatedStory.childStories}/>
                     )}
             </div>
         )
