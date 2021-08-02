@@ -4,7 +4,6 @@ import { AmalgamatedStory } from './AmalgamatedStory';
 export class FetchData extends Component {
     static displayName = FetchData.name;
     static Provider = {
-        NOT_SET: {id:0, name: ""},
         THE_GUARDIAN: { id: 1, name: "The Guardian" },
         BBC_NEWS: { id: 2, name: "BBC News" },
         DAILY_MAIL: { id: 3, name: "Daily Mail Online" },
@@ -12,7 +11,8 @@ export class FetchData extends Component {
     };
     constructor(props) {
         super(props);
-        this.state = { forecasts: [], loading: true, provider: 1, filteredStories:[] };
+        this.state = { storyData: [], loading: true, provider: FetchData.Provider.THE_GUARDIAN.id, filteredStories: [] };
+        this.changeProviderPreference = this.changeProviderPreference.bind(this);
     }
 
     componentDidMount() {
@@ -34,30 +34,46 @@ export class FetchData extends Component {
         )
     }
 
-  render() {
-    let contents = this.state.loading
-        ? <p><em>Loading...</em></p>
-        : FetchData.renderStories(this.state.filteredStories);
-        
-      return (
-        <div>
-            <h1>Weather forecast</h1>
-            <p>This component demonstrates fetching data from the server.</p>
-            {contents}
-        </div>
-    );
-  }
+
+    changeProviderPreference(e) {
+        this.setState({ provider: parseInt(e.target.value) },
+            this.applyProviderPreference
+        );
+    }
+
+    render() {
+        let contents = this.state.loading
+            ? <p><em>Loading...</em></p>
+            : FetchData.renderStories(this.state.filteredStories);
+        let providers = Object.values(FetchData.Provider)
+
+        return (
+            <div>
+                <h1>Weather forecast</h1>
+                <select value={this.state.provider} onChange={this.changeProviderPreference}>
+                    {providers.map(provider =>
+                        <option key={provider.id} value={provider.id}>{provider.name}</option>
+                    )}
+                </select>
+                {contents}
+            </div>
+        );
+    }
 
     async populateWeatherData() {
         const response = await fetch('stories');
         const data = await response.json();
-        this.setState({ forecasts: data });
-        this.applyProviderPreference(data)     
+        this.setState({ storyData: data },
+            this.applyProviderPreference
+        );
+            
     }
 
-    applyProviderPreference(data) {
+
+    applyProviderPreference() {
+        this.setState({loading: true})
         let filteredStories = [];
-        data.map(amalgamatedStory => {
+        this.state.storyData.map(amalgamatedStory => {
             let mainStory;
             let childStories = [];
             amalgamatedStory.stories.map(story => {
@@ -68,12 +84,12 @@ export class FetchData extends Component {
                     childStories.push(story)
                 }
             })
-            if (mainStory === undefined) {
+            if (mainStory === undefined) { 
                 mainStory = childStories[0];
                 childStories.shift();
             }
             filteredStories.push({ mainStory: mainStory, childStories: childStories });
         })
-        this.setState({ forecasts: data, loading: false, filteredStories: filteredStories });
+        this.setState({ loading: false, filteredStories: filteredStories });
     }
 }
