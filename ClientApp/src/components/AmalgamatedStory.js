@@ -1,4 +1,5 @@
 ﻿import React, { Component } from 'react';
+import { FormattedDate } from './FormattedDate';
 
 export class AmalgamatedStory extends Component {
 
@@ -30,13 +31,14 @@ export class AmalgamatedStory extends Component {
                 <div className={this.state.storyCompacted ? "hidden" : "story-details"}  >
                     <div>
                         <p>Story from {this.props.providerName}</p>
+                        <p><FormattedDate date={ this.props.storyDate}/></p>
                         <p dangerouslySetInnerHTML={{ __html: this.props.description }}></p>
                     </div>
                     <div>
                         {this.props.childStories.length > 0 ? <button onClick={this.toggleChildStories}>{this.state.childStoriesVisible ? 'Click to hide similiar stories' : 'Click to view similiar stories'}</button> : ''}
                         <div className={ this.state.childStoriesVisible ? "" : "hidden"}>
                             {this.props.childStories.map((story, index) =>
-                                <span key={index}> {story.providerName} -  <a href={story.storyUrl}>{story.title}</a> - {story.highestMatchScore}<br></br></span>
+                                <span key={index}> {story.providerName} -  <a href={story.storyUrl}>{story.title}</a> - <FormattedDate date={story.date} /><br></br></span>
 
                             )}
                         </div>

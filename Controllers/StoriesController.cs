@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Caching.Memory;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Xml;
 
@@ -10,6 +11,8 @@ namespace react_news_app.Controllers
     [Route("[controller]")]
     public class StoriesController : ControllerBase
     {
+        
+        private const string dateTimeFormat = "ddd, dd MMM yyyy HH:mm:ss";
         private const string StoriesCacheKey = "CACHED_STORIES";
         private TimeSpan CacheExpiryTime = TimeSpan.FromMinutes(3);
         private IMemoryCache _cache;
@@ -61,6 +64,7 @@ namespace react_news_app.Controllers
                     string title = node.SelectSingleNode("title") == null ? null : node.SelectSingleNode("title").InnerText;
                     string description = node.SelectSingleNode("description") == null ? "" : node.SelectSingleNode("description").InnerText;
                     string storyUrl = node.SelectSingleNode("link") == null ? null : node.SelectSingleNode("link").InnerText;
+                    string pubDate = node.SelectSingleNode("pubDate") == null ? null : node.SelectSingleNode("pubDate").InnerText;
                     Provider provider = NewsStory.getProviderFromFeed(Url);
                     if (title == null || storyUrl == null)
                     {
@@ -70,7 +74,7 @@ namespace react_news_app.Controllers
                     {
                         Title = title,
                         Description = description,
-                        Date = DateTime.Now,
+                        Date = pubDate == null ? DateTime.Now : DateTime.ParseExact(pubDate.Substring(0, pubDate.Length - 4), dateTimeFormat, null),
                         StoryUrl = storyUrl,
                         ImageUrl = "image url",
                         Provider = provider,

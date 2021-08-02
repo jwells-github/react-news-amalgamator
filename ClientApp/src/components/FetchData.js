@@ -28,6 +28,7 @@ export class FetchData extends Component {
                         title={amalgamatedStory.mainStory.title}
                         providerName={amalgamatedStory.mainStory.providerName}
                         description={amalgamatedStory.mainStory.description}
+                        storyDate={amalgamatedStory.mainStory.date }
                         childStories={amalgamatedStory.childStories}/>
                     )}
             </div>
