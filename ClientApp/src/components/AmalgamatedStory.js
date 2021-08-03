@@ -30,9 +30,10 @@ export class AmalgamatedStory extends Component {
                 </div>
                 <div className={this.state.storyCompacted ? "hidden" : "story-details"}  >
                     <div>
-                        <p>Story from {this.props.providerName}</p>
-                        <p><FormattedDate date={ this.props.storyDate}/></p>
-                        <p dangerouslySetInnerHTML={{ __html: this.props.description }}></p>
+                        <div class="story-meta">
+                            <em>Posted by {this.props.providerName} on <FormattedDate date={this.props.storyDate}/></em>
+                        </div>
+                        <p className="story-description" dangerouslySetInnerHTML={{ __html: this.props.description }}></p>
                     </div>
                     <div>
                         {this.props.childStories.length > 0 ? <button onClick={this.toggleChildStories}>{this.state.childStoriesVisible ? 'Click to hide similiar stories' : 'Click to view similiar stories'}</button> : ''}
