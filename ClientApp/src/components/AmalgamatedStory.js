@@ -30,7 +30,7 @@ export class AmalgamatedStory extends Component {
                 </div>
                 <div className={this.state.storyCompacted ? "hidden" : "story-details"}  >
                     <div>
-                        <div class="story-meta">
+                        <div className="story-meta">
                             <em>Posted by {this.props.providerName} on <FormattedDate date={this.props.storyDate}/></em>
                         </div>
                         <p className="story-description" dangerouslySetInnerHTML={{ __html: this.props.description }}></p>
