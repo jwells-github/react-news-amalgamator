@@ -11,7 +11,14 @@ export class FetchData extends Component {
     };
     constructor(props) {
         super(props);
-        this.state = { storyData: [], loading: true, provider: FetchData.Provider.THE_GUARDIAN.id, filteredStories: [] };
+        this.state = {
+            storyData: [],
+            loading: true,
+            provider: FetchData.Provider.THE_GUARDIAN.id,
+            bannedProviders: [],
+            filteredStories: []
+
+        };
         this.changeProviderPreference = this.changeProviderPreference.bind(this);
     }
 
@@ -77,7 +84,9 @@ export class FetchData extends Component {
         this.state.storyData.map(amalgamatedStory => {
             let mainStory;
             let childStories = [];
-            amalgamatedStory.stories.map(story => {
+            let chosenProviders = amalgamatedStory.stories.filter(story => !this.state.bannedProviders.includes(story.provider));
+            let storiesAvailable = chosenProviders.length > 0;
+            chosenProviders.map(story => {
                 if (story.provider === this.state.provider) {
                     mainStory = story
                 }
@@ -89,7 +98,10 @@ export class FetchData extends Component {
                 mainStory = childStories[0];
                 childStories.shift();
             }
-            filteredStories.push({ mainStory: mainStory, childStories: childStories });
+            if (storiesAvailable) {
+                filteredStories.push({ mainStory: mainStory, childStories: childStories });
+            }
+           
         })
         this.setState({ loading: false, filteredStories: filteredStories });
     }
