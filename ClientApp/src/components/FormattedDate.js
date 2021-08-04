@@ -9,7 +9,7 @@ export class FormattedDate extends Component {
 
     render() {
         return (
-            <span>Posted {new Date(Date.parse(this.props.date)).toString().substr(0, 21)}</span>
+            <span>{new Date(Date.parse(this.props.date)).toString().substr(0, 21)}</span>
         );
     }
 }
