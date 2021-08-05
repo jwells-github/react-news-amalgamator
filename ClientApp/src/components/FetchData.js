@@ -16,10 +16,13 @@ export class FetchData extends Component {
                 BBC_NEWS: { id: 2, name: "BBC News", display: true },
                 DAILY_MAIL: { id: 3, name: "Daily Mail Online", display: true },
                 THE_TELEGRAPH: { id: 4, name: "The Telegraph", display: true }
-            }
+            },
+            displayOptions: false
         };
         this.changeProviderPreference = this.changeProviderPreference.bind(this);
         this.toggleDisplayedProviders = this.toggleDisplayedProviders.bind(this);
+        this.toggleOptionsTab = this.toggleOptionsTab.bind(this);
+        this.optionsTab = React.createRef()
     }
 
     componentDidMount() {
@@ -53,10 +56,14 @@ export class FetchData extends Component {
         )
     }
     changeProviderPreference(e) {
-        console.log('why')
         this.setState({ provider: parseInt(e.target.value) },
             this.applyProviderPreference
         );
+    }
+
+    toggleOptionsTab() {
+        this.optionsTab.current.className = !this.state.displayOptions ? "options-bar show-options" : "options-bar hide-options"
+        this.setState({ displayOptions: !this.state.displayOptions });
     }
 
     render() {
@@ -66,29 +73,34 @@ export class FetchData extends Component {
         let providerList = [];
         for (const [key, provider] of Object.entries(this.state.providers)) {
             providerList.push(
-                <div key={provider.id}>
-                    <input
+                <div className="providerSelection" key={provider.id}>
+                    <label htmlFor={provider.name}>{provider.name}</label>
+                    <input 
                         name={key}
                         type="checkbox" id={provider.name}
                         checked={provider.display}
                         onChange={this.toggleDisplayedProviders} />
-                    <label htmlFor={provider.name}>{provider.name}</label>
+                    
                 </div>)
         }
 
         return (
             <div>
                 <h1>News Amalgamator</h1>
-                <h2>Preferred news provider</h2>
-                <select value={this.state.provider} onChange={this.changeProviderPreference}>
-                    <option key={0} value={0}>No preference</option>
-                    {Object.values(this.state.providers).map(provider =>
-                        <option key={provider.id} value={provider.id}>{provider.name}</option>
-                    )}
-                </select>
-                <div>
-                    <h2>News providers to display</h2>
-                    {providerList}
+                <button onClick={this.toggleOptionsTab}>Toggle Options</button>
+                <div className="hidden" ref={this.optionsTab}>
+                    <h2>Options</h2>
+                    <h3>Preferred news provider</h3>
+                    <select value={this.state.provider} onChange={this.changeProviderPreference}>
+                        <option key={0} value={0}>No preference</option>
+                        {Object.values(this.state.providers).map(provider =>
+                            <option key={provider.id} value={provider.id}>{provider.name}</option>
+                        )}
+                    </select>
+                    <div>
+                        <h3>News providers to display</h3>
+                        {providerList}
+                    </div>
                 </div>
                 {contents}
             </div>
