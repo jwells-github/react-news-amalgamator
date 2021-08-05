@@ -23,7 +23,7 @@ export class FetchData extends Component {
     }
 
     componentDidMount() {
-        this.populateWeatherData();
+        this.fetchStories();
     }
 
     static renderStories(amalgamatedStories) {
@@ -78,8 +78,8 @@ export class FetchData extends Component {
 
         return (
             <div>
-                <h1>Weather forecast</h1>
-                <h2>Preffered news provider</h2>
+                <h1>News Amalgamator</h1>
+                <h2>Preferred news provider</h2>
                 <select value={this.state.provider} onChange={this.changeProviderPreference}>
                     <option key={0} value={0}>No preference</option>
                     {Object.values(this.state.providers).map(provider =>
@@ -95,7 +95,7 @@ export class FetchData extends Component {
         )
     }
 
-    async populateWeatherData() {
+    async fetchStories() {
         const response = await fetch('stories');
         const data = await response.json();
         this.setState({ storyData: data },
