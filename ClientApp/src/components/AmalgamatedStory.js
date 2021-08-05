@@ -25,7 +25,7 @@ export class AmalgamatedStory extends Component {
                 <div className="story-header">
                     <button onClick={this.toggleCompactStory}>{this.state.storyCompacted ? "+" : "-" }</button>
                     <h2>
-                        <a target="_blank" href={this.props.storyUrl}>{this.props.title}</a>
+                        <a target="_blank" rel="noopener noreferrer" href={this.props.storyUrl}>{this.props.title}</a>
                     </h2>
                 </div>
                 <div className={this.state.storyCompacted ? "hidden" : "story-details"}  >
