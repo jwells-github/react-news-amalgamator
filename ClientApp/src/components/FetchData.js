@@ -4,15 +4,14 @@ import { AmalgamatedStory } from './AmalgamatedStory';
 export class FetchData extends Component {
     static displayName = FetchData.name;
     static darkModeCookieName = "darkmode"
-    static preferredProviderCookieName = "prefferedProvider"
+    static preferredProviderCookieName = "preferedProvider"
     constructor(props) {
-        console.log(document.cookie)
-        let prefferedProviderCookieExists = document.cookie.split(';').some((item) => item.trim().startsWith(FetchData.preferredProviderCookieName + '='))
+        let preferedProviderCookieExists = document.cookie.split(';').some((item) => item.trim().startsWith(FetchData.preferredProviderCookieName + '='))
         super(props);
         this.state = {
             storyData: [],
             loading: true,
-            provider: prefferedProviderCookieExists ? document.cookie.split('; ').find(row => row.startsWith(FetchData.preferredProviderCookieName + '=')).split('=')[1] : 0,
+            preferredProvider: preferedProviderCookieExists ? document.cookie.split('; ').find(row => row.startsWith(FetchData.preferredProviderCookieName + '=')).split('=')[1] : 0,
             filteredStories: [],
             providers: {
                 THE_GUARDIAN: { id: 1, name: "The Guardian", display: true },
@@ -29,6 +28,12 @@ export class FetchData extends Component {
         this.toggleDarkMode = this.toggleDarkMode.bind(this);
         this.optionsTab = React.createRef()
         document.body.className = this.state.darkModeEnabled ? "dark" : "";
+
+        let p = this.state.providers;
+        Object.keys(this.state.providers).forEach(key =>
+            p[key].display = document.cookie.split(';').some((item) => item.includes(key + '=true'))
+        )
+        this.state.providers = p;
     }
 
     componentDidMount() {
@@ -57,6 +62,7 @@ export class FetchData extends Component {
         const name = target.name;
         let providers = this.state.providers;
         providers[name].display = checked;
+        document.cookie = name + "=" + checked;
         this.setState({ providers: providers },
             this.applyProviderPreference
         )
@@ -64,7 +70,7 @@ export class FetchData extends Component {
     changeProviderPreference(e) {
         let provider = parseInt(e.target.value);
         document.cookie = FetchData.preferredProviderCookieName + '=' + provider
-        this.setState({ provider: provider },
+        this.setState({ preferredProvider: provider },
             this.applyProviderPreference
         );
     }
@@ -107,7 +113,7 @@ export class FetchData extends Component {
                 <div className="hidden" ref={this.optionsTab}>
                     <h2>Options</h2>
                     <h3>Preferred news provider</h3>
-                    <select value={this.state.provider} onChange={this.changeProviderPreference}>
+                    <select value={this.state.preferredProvider} onChange={this.changeProviderPreference}>
                         <option key={0} value={0}>No preference</option>
                         {Object.values(this.state.providers).map(provider =>
                             <option key={provider.id} value={provider.id}>{provider.name}</option>
@@ -162,7 +168,7 @@ export class FetchData extends Component {
             });
             let storiesAvailable = chosenProviders.length > 0;
             chosenProviders.forEach(story => {
-                if (story.provider === this.state.provider) {
+                if (story.provider === this.state.preferredProvider) {
                     mainStory = story
                 }
                 else {
