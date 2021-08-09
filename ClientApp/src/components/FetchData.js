@@ -4,14 +4,15 @@ import { AmalgamatedStory } from './AmalgamatedStory';
 export class FetchData extends Component {
     static displayName = FetchData.name;
     static darkModeCookieName = "darkmode"
+    static preferredProviderCookieName = "prefferedProvider"
     constructor(props) {
-
         console.log(document.cookie)
+        let prefferedProviderCookieExists = document.cookie.split(';').some((item) => item.trim().startsWith(FetchData.preferredProviderCookieName + '='))
         super(props);
         this.state = {
             storyData: [],
             loading: true,
-            provider: 0,
+            provider: prefferedProviderCookieExists ? document.cookie.split('; ').find(row => row.startsWith(FetchData.preferredProviderCookieName + '=')).split('=')[1] : 0,
             filteredStories: [],
             providers: {
                 THE_GUARDIAN: { id: 1, name: "The Guardian", display: true },
@@ -20,12 +21,12 @@ export class FetchData extends Component {
                 THE_TELEGRAPH: { id: 4, name: "The Telegraph", display: true }
             },
             displayOptions: false,
-            darkModeEnabled: document.cookie.split(';').some((item) => item.includes(FetchData.darkModeCookieName + '=true')) ,
+            darkModeEnabled: document.cookie.split(';').some((item) => item.includes(FetchData.darkModeCookieName + '=true')),
         };
         this.changeProviderPreference = this.changeProviderPreference.bind(this);
         this.toggleDisplayedProviders = this.toggleDisplayedProviders.bind(this);
         this.toggleOptionsTab = this.toggleOptionsTab.bind(this);
-        this.toggleDarkMode = this.toggleDarkMode.bind(this);   
+        this.toggleDarkMode = this.toggleDarkMode.bind(this);
         this.optionsTab = React.createRef()
         document.body.className = this.state.darkModeEnabled ? "dark" : "";
     }
@@ -43,9 +44,9 @@ export class FetchData extends Component {
                         title={amalgamatedStory.mainStory.title}
                         providerName={amalgamatedStory.mainStory.providerName}
                         description={amalgamatedStory.mainStory.description}
-                        storyDate={amalgamatedStory.mainStory.date }
-                        childStories={amalgamatedStory.childStories}/>
-                    )}
+                        storyDate={amalgamatedStory.mainStory.date}
+                        childStories={amalgamatedStory.childStories} />
+                )}
             </div>
         )
     }
@@ -61,7 +62,9 @@ export class FetchData extends Component {
         )
     }
     changeProviderPreference(e) {
-        this.setState({ provider: parseInt(e.target.value) },
+        let provider = parseInt(e.target.value);
+        document.cookie = FetchData.preferredProviderCookieName + '=' + provider
+        this.setState({ provider: provider },
             this.applyProviderPreference
         );
     }
@@ -88,12 +91,12 @@ export class FetchData extends Component {
             providerList.push(
                 <div className="providerSelection" key={provider.id}>
                     <label htmlFor={provider.name}>{provider.name}</label>
-                    <input 
+                    <input
                         name={key}
                         type="checkbox" id={provider.name}
                         checked={provider.display}
                         onChange={this.toggleDisplayedProviders} />
-                    
+
                 </div>)
         }
 
@@ -122,7 +125,7 @@ export class FetchData extends Component {
                                 name="toggleDarkMode"
                                 type="checkbox" id="toggleDarkMode"
                                 checked={this.state.darkModeEnabled}
-                                    onChange={this.toggleDarkMode} />
+                                onChange={this.toggleDarkMode} />
                         </div>
                     </div>
                 </div>
@@ -137,12 +140,12 @@ export class FetchData extends Component {
         this.setState({ storyData: data },
             this.applyProviderPreference
         );
-            
+
     }
 
 
     applyProviderPreference() {
-        this.setState({loading: true})
+        this.setState({ loading: true })
         let filteredStories = [];
         this.state.storyData.forEach(amalgamatedStory => {
             let mainStory;

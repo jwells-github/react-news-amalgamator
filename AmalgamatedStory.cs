@@ -11,7 +11,7 @@ namespace react_news_app
         {
             this.Stories = new List<NewsStory>();
         }
-
+        
         public string MasterTitle { get; set; }
         public string MasterDescription { get; set; }
         public string MasterStoryUrl { get; set; }
