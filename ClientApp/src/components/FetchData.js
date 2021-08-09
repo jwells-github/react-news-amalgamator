@@ -5,13 +5,13 @@ export class FetchData extends Component {
     static displayName = FetchData.name;
     static darkModeCookieName = "darkmode"
     static preferredProviderCookieName = "preferedProvider"
+
     constructor(props) {
-        let preferedProviderCookieExists = document.cookie.split(';').some((item) => item.trim().startsWith(FetchData.preferredProviderCookieName + '='))
         super(props);
         this.state = {
             storyData: [],
             loading: true,
-            preferredProvider: preferedProviderCookieExists ? document.cookie.split('; ').find(row => row.startsWith(FetchData.preferredProviderCookieName + '=')).split('=')[1] : 0,
+            preferredProvider: 0,
             filteredStories: [],
             providers: {
                 THE_GUARDIAN: { id: 1, name: "The Guardian", display: true },
@@ -20,24 +20,36 @@ export class FetchData extends Component {
                 THE_TELEGRAPH: { id: 4, name: "The Telegraph", display: true }
             },
             displayOptions: false,
-            darkModeEnabled: document.cookie.split(';').some((item) => item.includes(FetchData.darkModeCookieName + '=true')),
+            darkModeEnabled: false,
         };
         this.changeProviderPreference = this.changeProviderPreference.bind(this);
         this.toggleDisplayedProviders = this.toggleDisplayedProviders.bind(this);
         this.toggleOptionsTab = this.toggleOptionsTab.bind(this);
         this.toggleDarkMode = this.toggleDarkMode.bind(this);
         this.optionsTab = React.createRef()
-        document.body.className = this.state.darkModeEnabled ? "dark" : "";
 
-        let p = this.state.providers;
-        Object.keys(this.state.providers).forEach(key =>
-            p[key].display = document.cookie.split(';').some((item) => item.includes(key + '=true'))
-        )
-        this.state.providers = p;
+        this.getPreferencesFromCookies();
+        this.setDarkMode(this.state.darkModeEnabled);
     }
 
     componentDidMount() {
         this.fetchStories();
+    }
+
+    getPreferencesFromCookies() {
+        // state.preferredProvider setting
+        let preferedProviderCookieExists = document.cookie.split(';').some((item) => item.trim().startsWith(FetchData.preferredProviderCookieName + '='))
+        this.state.preferredProvider = preferedProviderCookieExists ? document.cookie.split('; ').find(row => row.startsWith(FetchData.preferredProviderCookieName + '=')).split('=')[1] : 0;
+
+        // state.providers display settings
+        let providers = this.state.providers;
+        Object.keys(this.state.providers).forEach(key =>
+            providers[key].display = document.cookie.split(';').some((item) => item.includes(key + '=true'))
+        )
+        this.state.providers = providers;
+
+        // state.darkModeEnabled setting
+        this.state.darkModeEnabled = document.cookie.split(';').some((item) => item.includes(FetchData.darkModeCookieName + '=true'))
     }
 
     static renderStories(amalgamatedStories) {
@@ -83,9 +95,13 @@ export class FetchData extends Component {
     toggleDarkMode(e) {
         const target = e.target;
         const checked = target.type === 'checkbox' ? target.checked : target.value;
-        document.body.className = checked ? "dark" : "";
         this.setState({ darkModeEnabled: checked });
         document.cookie = FetchData.darkModeCookieName + "=" + checked;
+        this.setDarkMode(checked);
+    }
+
+    setDarkMode(bool) {
+        document.body.className = bool ? "dark" : "";
     }
 
     render() {
