@@ -3,8 +3,10 @@ import { AmalgamatedStory } from './AmalgamatedStory';
 
 export class FetchData extends Component {
     static displayName = FetchData.name;
-
+    static darkModeCookieName = "darkmode"
     constructor(props) {
+
+        console.log(document.cookie)
         super(props);
         this.state = {
             storyData: [],
@@ -18,14 +20,14 @@ export class FetchData extends Component {
                 THE_TELEGRAPH: { id: 4, name: "The Telegraph", display: true }
             },
             displayOptions: false,
-            darkModeEnabled: true,
+            darkModeEnabled: document.cookie.split(';').some((item) => item.includes(FetchData.darkModeCookieName + '=true')) ,
         };
         this.changeProviderPreference = this.changeProviderPreference.bind(this);
         this.toggleDisplayedProviders = this.toggleDisplayedProviders.bind(this);
         this.toggleOptionsTab = this.toggleOptionsTab.bind(this);
         this.toggleDarkMode = this.toggleDarkMode.bind(this);   
         this.optionsTab = React.createRef()
-        document.body.className = "dark";
+        document.body.className = this.state.darkModeEnabled ? "dark" : "";
     }
 
     componentDidMount() {
@@ -74,7 +76,7 @@ export class FetchData extends Component {
         const checked = target.type === 'checkbox' ? target.checked : target.value;
         document.body.className = checked ? "dark" : "";
         this.setState({ darkModeEnabled: checked });
-
+        document.cookie = FetchData.darkModeCookieName + "=" + checked;
     }
 
     render() {
