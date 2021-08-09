@@ -17,12 +17,15 @@ export class FetchData extends Component {
                 DAILY_MAIL: { id: 3, name: "Daily Mail Online", display: true },
                 THE_TELEGRAPH: { id: 4, name: "The Telegraph", display: true }
             },
-            displayOptions: false
+            displayOptions: false,
+            darkModeEnabled: true,
         };
         this.changeProviderPreference = this.changeProviderPreference.bind(this);
         this.toggleDisplayedProviders = this.toggleDisplayedProviders.bind(this);
         this.toggleOptionsTab = this.toggleOptionsTab.bind(this);
+        this.toggleDarkMode = this.toggleDarkMode.bind(this);   
         this.optionsTab = React.createRef()
+        document.body.className = "dark";
     }
 
     componentDidMount() {
@@ -66,6 +69,14 @@ export class FetchData extends Component {
         this.setState({ displayOptions: !this.state.displayOptions });
     }
 
+    toggleDarkMode(e) {
+        const target = e.target;
+        const checked = target.type === 'checkbox' ? target.checked : target.value;
+        document.body.className = checked ? "dark" : "";
+        this.setState({ darkModeEnabled: checked });
+
+    }
+
     render() {
         let contents = this.state.loading
             ? <p><em>Loading...</em></p>
@@ -100,6 +111,17 @@ export class FetchData extends Component {
                     <div>
                         <h3>News providers to display</h3>
                         {providerList}
+                    </div>
+                    <div>
+                        <h3>Dark Mode</h3>
+                        <div className="providerSelection">
+                            <label htmlFor="toggleDarkMode">Enable dark mode</label>
+                            <input
+                                name="toggleDarkMode"
+                                type="checkbox" id="toggleDarkMode"
+                                checked={this.state.darkModeEnabled}
+                                    onChange={this.toggleDarkMode} />
+                        </div>
                     </div>
                 </div>
                 {contents}

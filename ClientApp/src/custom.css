@@ -100,6 +100,35 @@ button:hover {
     animation-duration: 1s;
 }
 
+.dark {
+    background: #181818;
+    color: #aaaaaa
+}
+
+.dark .options-bar, .dark select {
+    background: #3e3d3d;
+    color: #84c5fb;
+}
+.dark button {
+    background: #3e3d3d;
+    color: #84c5fb;
+    border: 1px solid black;
+}
+
+.dark button:hover {
+    background-color: rgb(90 90 90);
+    border: 1px solid white;
+}
+
+.dark nav {
+    background: #242424;
+}
+
+.dark .text-dark, .dark .navbar-brand, .dark a.text-dark:hover, .dark a.text-dark:focus {
+    color: white !important;
+}
+
+
 @keyframes slideFromRight {
     from{
         right:-350px;
