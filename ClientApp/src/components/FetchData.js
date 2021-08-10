@@ -43,9 +43,12 @@ export class FetchData extends Component {
 
         // state.providers display settings
         let providers = this.state.providers;
-        Object.keys(this.state.providers).forEach(key =>
-            providers[key].display = document.cookie.split(';').some((item) => item.includes(key + '=true'))
-        )
+        Object.keys(this.state.providers).forEach(key => {
+            let cookieExistsForProvider = document.cookie.split(';').some((item) => item.trim().startsWith(key + '='))
+            if (cookieExistsForProvider) {
+                providers[key].display = document.cookie.split(';').some((item) => item.includes(key + '=true'))
+            }
+        })
         this.state.providers = providers;
 
         // state.darkModeEnabled setting
