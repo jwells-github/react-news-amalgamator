@@ -2,8 +2,7 @@ import React, { Component } from 'react';
 import { AmalgamatedStory } from './AmalgamatedStory';
 
 
-export class FetchData extends Component {
-    static displayName = FetchData.name;
+export class NewsFeed extends Component {
     static darkModeCookieName = "darkmode"
     static preferredProviderCookieName = "preferedProvider"
 
@@ -47,7 +46,7 @@ export class FetchData extends Component {
     render() {
         let contents = this.state.loading
             ? <p><em>Loading...</em></p>
-            : FetchData.renderStories(this.state.filteredStories);
+            : NewsFeed.renderStories(this.state.filteredStories);
         return (
             <div>
                 <h1>News Amalgamator</h1>

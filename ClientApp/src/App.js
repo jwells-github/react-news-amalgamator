@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Container } from 'reactstrap';
 import { NavMenu } from './components/NavMenu';
-import { FetchData } from './components/FetchData';
+import { NewsFeed } from './components/NewsFeed';
 import { Options } from './components/Options';
 import { OptionsTab } from './components/OptionsTab';
 import './custom.css'
@@ -31,8 +31,8 @@ export default class App extends Component {
 
     getPreferencesFromCookies() {
         // state.preferredProvider setting
-        let preferedProviderCookieExists = document.cookie.split(';').some((item) => item.trim().startsWith(FetchData.preferredProviderCookieName + '='))
-        this.state.preferredProvider = preferedProviderCookieExists ? document.cookie.split('; ').find(row => row.startsWith(FetchData.preferredProviderCookieName + '=')).split('=')[1] : 0;
+        let preferedProviderCookieExists = document.cookie.split(';').some((item) => item.trim().startsWith(NewsFeed.preferredProviderCookieName + '='))
+        this.state.preferredProvider = preferedProviderCookieExists ? document.cookie.split('; ').find(row => row.startsWith(NewsFeed.preferredProviderCookieName + '=')).split('=')[1] : 0;
 
         // state.providers display settings
         let providers = this.state.providers;
@@ -45,12 +45,12 @@ export default class App extends Component {
         this.state.providers = providers;
 
         // state.darkModeEnabled setting
-        this.state.darkModeEnabled = document.cookie.split(';').some((item) => item.includes(FetchData.darkModeCookieName + '=true'))
+        this.state.darkModeEnabled = document.cookie.split(';').some((item) => item.includes(NewsFeed.darkModeCookieName + '=true'))
     }
 
     changeProviderPreference(e) {
         let provider = parseInt(e.target.value);
-        document.cookie = FetchData.preferredProviderCookieName + '=' + provider
+        document.cookie = NewsFeed.preferredProviderCookieName + '=' + provider
         this.setState({ preferredProvider: provider });
     }
 
@@ -70,7 +70,7 @@ export default class App extends Component {
         const target = e.target;
         const checked = target.type === 'checkbox' ? target.checked : target.value;
         this.setState({ darkModeEnabled: checked });
-        document.cookie = FetchData.darkModeCookieName + "=" + checked;
+        document.cookie = NewsFeed.darkModeCookieName + "=" + checked;
         this.setDarkMode(checked);
     }
 
@@ -87,7 +87,7 @@ export default class App extends Component {
         <div>
             <NavMenu toggleOptionsDisplay={this.toggleOptionsDisplay}/>
             <Container>
-                <FetchData
+                <NewsFeed
                     preferredProvider={this.state.preferredProvider}
                     providers={this.state.providers}
                     displayOptions={this.state.displayOptions}/>
