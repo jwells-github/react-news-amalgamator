@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import { AmalgamatedStory } from './AmalgamatedStory';
+import { Options } from './Options';
+import { OptionsTab } from './OptionsTab';
 
 export class FetchData extends Component {
     static displayName = FetchData.name;
@@ -24,9 +26,7 @@ export class FetchData extends Component {
         };
         this.changeProviderPreference = this.changeProviderPreference.bind(this);
         this.toggleDisplayedProviders = this.toggleDisplayedProviders.bind(this);
-        this.toggleOptionsTab = this.toggleOptionsTab.bind(this);
         this.toggleDarkMode = this.toggleDarkMode.bind(this);
-        this.optionsTab = React.createRef()
 
         this.getPreferencesFromCookies();
         this.setDarkMode(this.state.darkModeEnabled);
@@ -90,11 +90,6 @@ export class FetchData extends Component {
         );
     }
 
-    toggleOptionsTab() {
-        this.optionsTab.current.className = !this.state.displayOptions ? "options-bar show-options" : "options-bar hide-options"
-        this.setState({ displayOptions: !this.state.displayOptions });
-    }
-
     toggleDarkMode(e) {
         const target = e.target;
         const checked = target.type === 'checkbox' ? target.checked : target.value;
@@ -111,49 +106,23 @@ export class FetchData extends Component {
         let contents = this.state.loading
             ? <p><em>Loading...</em></p>
             : FetchData.renderStories(this.state.filteredStories);
-        let providerList = [];
-        for (const [key, provider] of Object.entries(this.state.providers)) {
-            providerList.push(
-                <div className="providerSelection" key={provider.id}>
-                    <label htmlFor={provider.name}>{provider.name}</label>
-                    <input
-                        name={key}
-                        type="checkbox" id={provider.name}
-                        checked={provider.display}
-                        onChange={this.toggleDisplayedProviders} />
 
-                </div>)
-        }
 
         return (
             <div>
                 <h1>News Amalgamator</h1>
-                <button onClick={this.toggleOptionsTab}>Toggle Options</button>
-                <div className="hidden" ref={this.optionsTab}>
-                    <h2>Options</h2>
-                    <h3>Preferred news provider</h3>
-                    <select value={this.state.preferredProvider} onChange={this.changeProviderPreference}>
-                        <option key={0} value={0}>No preference</option>
-                        {Object.values(this.state.providers).map(provider =>
-                            <option key={provider.id} value={provider.id}>{provider.name}</option>
-                        )}
-                    </select>
-                    <div>
-                        <h3>News providers to display</h3>
-                        {providerList}
-                    </div>
-                    <div>
-                        <h3>Dark Mode</h3>
-                        <div className="providerSelection">
-                            <label htmlFor="toggleDarkMode">Enable dark mode</label>
-                            <input
-                                name="toggleDarkMode"
-                                type="checkbox" id="toggleDarkMode"
-                                checked={this.state.darkModeEnabled}
-                                onChange={this.toggleDarkMode} />
-                        </div>
-                    </div>
-                </div>
+                <button onClick={() => this.setState({ displayOptions: !this.state.displayOptions})}>Toggle Options</button>
+                <OptionsTab displayOptions={this.state.displayOptions}>
+                    <Options
+                        preferredProvider={this.state.preferredProvider}
+                        changeProviderPreference={this.changeProviderPreference}
+                        providers={this.state.providers}
+                        toggleDisplayedProviders={this.toggleDisplayedProviders}
+                        darkModeEnabled={this.state.darkModeEnabled}
+                        toggleDarkMode={this.toggleDarkMode}
+                    />
+                </OptionsTab>
+
                 {contents}
             </div>
         )
