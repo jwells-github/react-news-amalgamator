@@ -89,6 +89,10 @@ button:hover {
     width: 1.2em;
 }
 
+.options-header{
+    display:flex;
+    justify-content:space-between;
+}
 .hide-options {
     right:-1000px;
     animation-name: f;

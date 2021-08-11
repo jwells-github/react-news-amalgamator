@@ -23,7 +23,10 @@ export class OptionsTab extends Component {
     render() {
         return (
             <div className="hidden" ref={this.optionsTab}>
-                <h2>Options</h2>
+                <div className="options-header">
+                    <h2>Options</h2>
+                    <button onClick={this.props.toggleOptionsDisplay}>Hide Options</button>
+                </div>
                 {this.props.children}
             </div>
         );
