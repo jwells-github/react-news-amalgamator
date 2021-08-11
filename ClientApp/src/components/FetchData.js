@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { AmalgamatedStory } from './AmalgamatedStory';
-import { Options } from './Options';
-import { OptionsTab } from './OptionsTab';
+
 
 export class FetchData extends Component {
     static displayName = FetchData.name;
@@ -13,46 +12,20 @@ export class FetchData extends Component {
         this.state = {
             storyData: [],
             loading: true,
-            preferredProvider: 0,
             filteredStories: [],
-            providers: {
-                THE_GUARDIAN: { id: 1, name: "The Guardian", display: true },
-                BBC_NEWS: { id: 2, name: "BBC News", display: true },
-                DAILY_MAIL: { id: 3, name: "Daily Mail Online", display: true },
-                THE_TELEGRAPH: { id: 4, name: "The Telegraph", display: true }
-            },
-            displayOptions: false,
-            darkModeEnabled: false,
         };
-        this.changeProviderPreference = this.changeProviderPreference.bind(this);
-        this.toggleDisplayedProviders = this.toggleDisplayedProviders.bind(this);
-        this.toggleDarkMode = this.toggleDarkMode.bind(this);
-
-        this.getPreferencesFromCookies();
-        this.setDarkMode(this.state.darkModeEnabled);
     }
 
     componentDidMount() {
         this.fetchStories();
     }
 
-    getPreferencesFromCookies() {
-        // state.preferredProvider setting
-        let preferedProviderCookieExists = document.cookie.split(';').some((item) => item.trim().startsWith(FetchData.preferredProviderCookieName + '='))
-        this.state.preferredProvider = preferedProviderCookieExists ? document.cookie.split('; ').find(row => row.startsWith(FetchData.preferredProviderCookieName + '=')).split('=')[1] : 0;
+    componentDidUpdate(prevProps) {
+        if (prevProps.preferredProvider !== this.props.preferredProvider ||
+            prevProps.providers !== this.props.providers) {
+            this.applyProviderPreference()
+        }
 
-        // state.providers display settings
-        let providers = this.state.providers;
-        Object.keys(this.state.providers).forEach(key => {
-            let cookieExistsForProvider = document.cookie.split(';').some((item) => item.trim().startsWith(key + '='))
-            if (cookieExistsForProvider) {
-                providers[key].display = document.cookie.split(';').some((item) => item.includes(key + '=true'))
-            }
-        })
-        this.state.providers = providers;
-
-        // state.darkModeEnabled setting
-        this.state.darkModeEnabled = document.cookie.split(';').some((item) => item.includes(FetchData.darkModeCookieName + '=true'))
     }
 
     static renderStories(amalgamatedStories) {
@@ -71,58 +44,13 @@ export class FetchData extends Component {
         )
     }
 
-    toggleDisplayedProviders(e) {
-        const target = e.target;
-        const checked = target.type === 'checkbox' ? target.checked : target.value;
-        const name = target.name;
-        let providers = this.state.providers;
-        providers[name].display = checked;
-        document.cookie = name + "=" + checked;
-        this.setState({ providers: providers },
-            this.applyProviderPreference
-        )
-    }
-    changeProviderPreference(e) {
-        let provider = parseInt(e.target.value);
-        document.cookie = FetchData.preferredProviderCookieName + '=' + provider
-        this.setState({ preferredProvider: provider },
-            this.applyProviderPreference
-        );
-    }
-
-    toggleDarkMode(e) {
-        const target = e.target;
-        const checked = target.type === 'checkbox' ? target.checked : target.value;
-        this.setState({ darkModeEnabled: checked });
-        document.cookie = FetchData.darkModeCookieName + "=" + checked;
-        this.setDarkMode(checked);
-    }
-
-    setDarkMode(bool) {
-        document.body.className = bool ? "dark" : "";
-    }
-
     render() {
         let contents = this.state.loading
             ? <p><em>Loading...</em></p>
             : FetchData.renderStories(this.state.filteredStories);
-
-
         return (
             <div>
                 <h1>News Amalgamator</h1>
-                <button onClick={() => this.setState({ displayOptions: !this.state.displayOptions})}>Toggle Options</button>
-                <OptionsTab displayOptions={this.state.displayOptions}>
-                    <Options
-                        preferredProvider={this.state.preferredProvider}
-                        changeProviderPreference={this.changeProviderPreference}
-                        providers={this.state.providers}
-                        toggleDisplayedProviders={this.toggleDisplayedProviders}
-                        darkModeEnabled={this.state.darkModeEnabled}
-                        toggleDarkMode={this.toggleDarkMode}
-                    />
-                </OptionsTab>
-
                 {contents}
             </div>
         )
@@ -134,9 +62,7 @@ export class FetchData extends Component {
         this.setState({ storyData: data },
             this.applyProviderPreference
         );
-
     }
-
 
     applyProviderPreference() {
         this.setState({ loading: true })
@@ -146,7 +72,7 @@ export class FetchData extends Component {
             let childStories = [];
             let chosenProviders = amalgamatedStory.stories.filter(story => {
                 let displayStory = true;;
-                let providers = Object.values(this.state.providers)
+                let providers = Object.values(this.props.providers)
                 providers.forEach(provider => {
                     if (provider.id === story.provider) {
                         displayStory = provider.display;
@@ -156,7 +82,7 @@ export class FetchData extends Component {
             });
             let storiesAvailable = chosenProviders.length > 0;
             chosenProviders.forEach(story => {
-                if (story.provider === this.state.preferredProvider) {
+                if (story.provider === this.props.preferredProvider) {
                     mainStory = story
                 }
                 else {
