@@ -4,53 +4,35 @@ import { NavMenu } from './components/NavMenu';
 import { NewsFeed } from './components/NewsFeed';
 import { Options } from './components/Options';
 import { OptionsTab } from './components/OptionsTab';
+import { CookieManager } from './CookieManager';
 import './custom.css'
 
 export default class App extends Component {
 
+    static defaultProviders = {
+        THE_GUARDIAN: { id: 1, name: "The Guardian", display: true },
+        BBC_NEWS: { id: 2, name: "BBC News", display: true },
+        DAILY_MAIL: { id: 3, name: "Daily Mail Online", display: true },
+        THE_TELEGRAPH: { id: 4, name: "The Telegraph", display: true }
+    }
     constructor(props) {
         super(props);
         this.state = {
-            preferredProvider: 0,
-            providers: {
-                THE_GUARDIAN: { id: 1, name: "The Guardian", display: true },
-                BBC_NEWS: { id: 2, name: "BBC News", display: true },
-                DAILY_MAIL: { id: 3, name: "Daily Mail Online", display: true },
-                THE_TELEGRAPH: { id: 4, name: "The Telegraph", display: true }
-            },
+            preferredProvider: CookieManager.getPreferredProviderFromCookie(),
+            providers: CookieManager.getProvidersFromCookie(App.defaultProviders),
             displayOptions: false,
-            darkModeEnabled: false,
+            darkModeEnabled: CookieManager.getDarkModeFromCookie(),
         };
         this.changeProviderPreference = this.changeProviderPreference.bind(this);
-        this.getPreferencesFromCookies();
         this.toggleDisplayedProviders = this.toggleDisplayedProviders.bind(this);
         this.toggleDarkMode = this.toggleDarkMode.bind(this);
         this.toggleOptionsDisplay = this.toggleOptionsDisplay.bind(this);
         this.setDarkMode(this.state.darkModeEnabled);
     }
 
-    getPreferencesFromCookies() {
-        // state.preferredProvider setting
-        let preferedProviderCookieExists = document.cookie.split(';').some((item) => item.trim().startsWith(NewsFeed.preferredProviderCookieName + '='))
-        this.state.preferredProvider = preferedProviderCookieExists ? document.cookie.split('; ').find(row => row.startsWith(NewsFeed.preferredProviderCookieName + '=')).split('=')[1] : 0;
-
-        // state.providers display settings
-        let providers = this.state.providers;
-        Object.keys(this.state.providers).forEach(key => {
-            let cookieExistsForProvider = document.cookie.split(';').some((item) => item.trim().startsWith(key + '='))
-            if (cookieExistsForProvider) {
-                providers[key].display = document.cookie.split(';').some((item) => item.includes(key + '=true'))
-            }
-        })
-        this.state.providers = providers;
-
-        // state.darkModeEnabled setting
-        this.state.darkModeEnabled = document.cookie.split(';').some((item) => item.includes(NewsFeed.darkModeCookieName + '=true'))
-    }
-
     changeProviderPreference(e) {
         let provider = parseInt(e.target.value);
-        document.cookie = NewsFeed.preferredProviderCookieName + '=' + provider
+        document.cookie = CookieManager.preferredProviderCookieName + '=' + provider
         this.setState({ preferredProvider: provider });
     }
 
@@ -70,7 +52,7 @@ export default class App extends Component {
         const target = e.target;
         const checked = target.type === 'checkbox' ? target.checked : target.value;
         this.setState({ darkModeEnabled: checked });
-        document.cookie = NewsFeed.darkModeCookieName + "=" + checked;
+        document.cookie = CookieManager.darkModeCookieName + "=" + checked;
         this.setDarkMode(checked);
     }
 

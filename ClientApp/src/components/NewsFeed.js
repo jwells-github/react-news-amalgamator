@@ -3,9 +3,6 @@ import { AmalgamatedStory } from './AmalgamatedStory';
 
 
 export class NewsFeed extends Component {
-    static darkModeCookieName = "darkmode"
-    static preferredProviderCookieName = "preferedProvider"
-
     constructor(props) {
         super(props);
         this.state = {
