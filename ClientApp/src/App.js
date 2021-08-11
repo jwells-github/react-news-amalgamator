@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import { Route } from 'react-router';
-import { Layout } from './components/Layout';
+import { Container } from 'reactstrap';
+import { NavMenu } from './components/NavMenu';
 import { FetchData } from './components/FetchData';
 
 import './custom.css'
@@ -10,9 +10,12 @@ export default class App extends Component {
 
   render () {
     return (
-      <Layout>
-        <Route exact path='/' component={FetchData} />
-      </Layout>
+        <div>
+            <NavMenu />
+            <Container>
+                <FetchData />
+            </Container>
+        </div>
     );
   }
 }
