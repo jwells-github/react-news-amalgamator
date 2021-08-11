@@ -2,10 +2,6 @@
 
 export class Options extends Component {
 
-    constructor(props) {
-        super(props);
-    }
-
     render() {
         let providerList = [];
         for (const [key, provider] of Object.entries(this.props.providers)) {
