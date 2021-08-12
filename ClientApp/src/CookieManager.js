@@ -1,4 +1,6 @@
-﻿export class CookieManager {
+﻿import { DefaultValues } from "./DefaultValues"
+
+export class CookieManager {
     static darkModeCookieName = "darkmode"
     static preferredProviderCookieName = "preferedProvider"
 
@@ -18,6 +20,6 @@
 
     static getPreferredProviderFromCookie() {
         let preferedProviderCookieExists = document.cookie.split(';').some((item) => item.trim().startsWith(CookieManager.preferredProviderCookieName + '='))
-        return preferedProviderCookieExists ? document.cookie.split('; ').find(row => row.startsWith(CookieManager.preferredProviderCookieName + '=')).split('=')[1] : 0;
+        return preferedProviderCookieExists ? document.cookie.split('; ').find(row => row.startsWith(CookieManager.preferredProviderCookieName + '=')).split('=')[1] : DefaultValues.defaultPreferredProvider;
     }
 }

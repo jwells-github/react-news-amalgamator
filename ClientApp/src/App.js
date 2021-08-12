@@ -6,20 +6,15 @@ import { Options } from './components/Options';
 import { OptionsTab } from './components/OptionsTab';
 import { CookieManager } from './CookieManager';
 import './custom.css'
+import { DefaultValues } from './DefaultValues';
 
 export default class App extends Component {
 
-    static defaultProviders = {
-        THE_GUARDIAN: { id: 1, name: "The Guardian", display: true },
-        BBC_NEWS: { id: 2, name: "BBC News", display: true },
-        DAILY_MAIL: { id: 3, name: "Daily Mail Online", display: true },
-        THE_TELEGRAPH: { id: 4, name: "The Telegraph", display: true }
-    }
     constructor(props) {
         super(props);
         this.state = {
             preferredProvider: CookieManager.getPreferredProviderFromCookie(),
-            providers: CookieManager.getProvidersFromCookie(App.defaultProviders),
+            providers: CookieManager.getProvidersFromCookie(DefaultValues.providers),
             displayOptions: false,
             darkModeEnabled: CookieManager.getDarkModeFromCookie(),
         };
