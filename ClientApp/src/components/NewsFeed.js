@@ -94,6 +94,12 @@ export class NewsFeed extends Component {
             }
 
         })
-        this.setState({ loading: false, filteredStories: filteredStories });
+        this.setState({ loading: false, filteredStories: this.sortStoriesbyDate(filteredStories) });
+    }
+    sortStoriesbyDate(stories) {
+        let sortedStories = stories.sort((firstStory, secondStory) => {
+            return new Date(Date.parse(secondStory.mainStory.date)) - new Date(Date.parse(firstStory.mainStory.date))
+        })
+        return sortedStories;
     }
 }
