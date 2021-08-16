@@ -3,13 +3,17 @@ import { AmalgamatedStory } from './AmalgamatedStory';
 
 
 export class NewsFeed extends Component {
+
     constructor(props) {
         super(props);
         this.state = {
             storyData: [],
             loading: true,
             filteredStories: [],
+            sortMethod: 0,
+            sortText: "",
         };
+        this.cycleSortMethod = this.cycleSortMethod.bind(this);
     }
 
     componentDidMount() {
@@ -22,6 +26,23 @@ export class NewsFeed extends Component {
             this.applyProviderPreference()
         }
 
+    }
+
+    cycleSortMethod() {
+        const numberOfSortMethods = 2;
+        let sortMethod = this.state.sortMethod < numberOfSortMethods ? (this.state.sortMethod) + 1 : 1
+        switch (sortMethod) {
+            case 1:
+                this.setState({ filteredStories: this.sortStoriesByDate(this.state.filteredStories), sortText: "Sorting by Date" });
+                break;
+            case 2:
+                this.setState({
+                    filteredStories: this.sortStoriesByChildCount(this.state.filteredStories), sortText: "Sorting by Number of Similiar Stories"});
+                break;
+            default:
+                break;
+        }
+        this.setState({ sortMethod: sortMethod } )
     }
 
     static renderStories(amalgamatedStories) {
@@ -46,7 +67,8 @@ export class NewsFeed extends Component {
             : NewsFeed.renderStories(this.state.filteredStories);
         return (
             <div>
-                <h1>News Amalgamator</h1>
+                <h2>{this.state.sortText}</h2>
+                <button onClick={this.cycleSortMethod}>Change sort method</button>
                 {contents}
             </div>
         )
@@ -94,11 +116,22 @@ export class NewsFeed extends Component {
             }
 
         })
-        this.setState({ loading: false, filteredStories: this.sortStoriesbyDate(filteredStories) });
+        this.setState({ loading: false, filteredStories: filteredStories }, () =>
+            this.cycleSortMethod()
+        );
+
     }
-    sortStoriesbyDate(stories) {
+
+    sortStoriesByDate(stories) {
         let sortedStories = stories.sort((firstStory, secondStory) => {
             return new Date(Date.parse(secondStory.mainStory.date)) - new Date(Date.parse(firstStory.mainStory.date))
+        })
+        return sortedStories;
+    }
+
+    sortStoriesByChildCount(stories) {
+        let sortedStories = stories.sort((firstStory, secondStory) => {
+            return secondStory.childStories.length - firstStory.childStories.length;
         })
         return sortedStories;
     }
