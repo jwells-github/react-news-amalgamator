@@ -132,7 +132,6 @@ button:hover {
     color: white !important;
 }
 
-
 @keyframes slideFromRight {
     from{
         right:-350px;

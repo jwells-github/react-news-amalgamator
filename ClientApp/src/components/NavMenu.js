@@ -1,4 +1,3 @@
-/// <reference path="../app.js" />
 import React, { Component } from 'react';
 import { Collapse, Container, Navbar, NavbarBrand, NavbarToggler, NavItem } from 'reactstrap';
 import { Link } from 'react-router-dom';
