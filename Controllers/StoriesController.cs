@@ -89,7 +89,84 @@ namespace react_news_app.Controllers
             }
             return newsList;
         }
+        public List<AmalgamatedStory> amalgamateStories(List<AmalgamatedStory> alreadyAmalgamatedStories, List<NewsStory> storiesToAmalgamate)
+        {
+            char[] charactersToTrim = new char[] { '"', '\'', '-', '?', '!', '`', ',', '.' };
+            List<AmalgamatedStory> amalgamatedStories = alreadyAmalgamatedStories;
+            foreach(NewsStory story in storiesToAmalgamate)
+            {
+                int highestMatchScore = 0;
+                AmalgamatedStory highestMatchingStory = null;
+                foreach (AmalgamatedStory amalgamatedStory in amalgamatedStories)
+                {
+                    string[] storyTitle = story.Title.Trim(charactersToTrim).Split(" ");
+                    bool previousWordWasCapitalAndMatched = false;
+                    int matchScore = 0;
+                    int divisor = 4;
+                    int defaultMatchMin = 4;
+                    int matchMinimum = (storyTitle.Count() / divisor) >= defaultMatchMin ? storyTitle.Count() / divisor : defaultMatchMin;
+                    
+                    foreach (string word in storyTitle)
+                    {
+                        bool wordContainsCapitals = word.Any(char.IsUpper);
+                        if (word.Length < 4 && !wordContainsCapitals)
+                        {
+                            continue;
+                        }
+                        bool directMatch = amalgamatedStory.amalgamtedTitleWords.Contains(word);
+                        bool lowerMatch = amalgamatedStory.amalgamtedTitleWords.Contains(word, StringComparer.OrdinalIgnoreCase);
+                        
+                        if (lowerMatch)
+                        {
+                            int score = 2;
+                            if (directMatch)
+                            {
+                                score *= matchMinimum;
+                                score *= previousWordWasCapitalAndMatched ? 2 : 1;
+                                previousWordWasCapitalAndMatched = true;
+                            }
+                            else
+                            {
+                                previousWordWasCapitalAndMatched = false;
+                            }
+                            matchScore += score;
+                        }
+                        else
+                        {
+                            previousWordWasCapitalAndMatched = false;
+                            matchScore -= wordContainsCapitals ? matchMinimum -1: 1;
+                        }
+                    }
+                    if(matchScore >= matchMinimum && matchScore > highestMatchScore)
+                    {
+                        highestMatchingStory = amalgamatedStory;
+                        highestMatchScore = matchScore;
+                    }
+                }
+                story.highestMatchScore = highestMatchScore;
+                if(highestMatchingStory != null)
+                {
+                    highestMatchingStory.Stories.Add(story);
+                    highestMatchingStory.numberOfStories = highestMatchingStory.Stories.Count();
+                    highestMatchingStory.amalgamtedTitleWords.Union(story.Title.Trim(charactersToTrim).Split(" ").ToList());
+                }
+                else
+                {
+                    AmalgamatedStory newAmalgamatedStory = new AmalgamatedStory
+                    {
+                        amalgamtedTitleWords = story.Title.Trim(charactersToTrim).Split(" ").ToList()
+                    };
+                    newAmalgamatedStory.Stories.Add(story);
+                    amalgamatedStories.Add(newAmalgamatedStory);
+                }
+            }
+            return amalgamatedStories;
+        }
 
+        /*
+         * 
+         * old Version
+         * 
         public List<AmalgamatedStory> amalgamateStories(List<AmalgamatedStory> alreadyAmalgamatedStories, List<NewsStory> storiesToAmalgamate)
         {
             char[] charactersToTrim = new char[] { '"', '\'', '-', '?', '!', '`', ',', '.' };
@@ -161,14 +238,17 @@ namespace react_news_app.Controllers
                     {
                         MasterDescription = story.Description,
                         MasterTitle = story.Title,
-                        MasterStoryUrl = story.StoryUrl
+                        MasterStoryUrl = story.StoryUrl,
                     };
                     newAmalgamatedStory.Stories.Add(story);
+                   
                     amalgamatedStories.Add(newAmalgamatedStory);
                 }
             }
             return amalgamatedStories;
         }
+
+        */
     }
 }
 
