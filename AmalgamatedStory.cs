@@ -10,13 +10,11 @@ namespace react_news_app
         public AmalgamatedStory()
         {
             this.Stories = new List<NewsStory>();
+            this.amalgamtedTitleWords = new List<String>();
         }
-        
-        public string MasterTitle { get; set; }
-        public string MasterDescription { get; set; }
-        public string MasterStoryUrl { get; set; }
-
         public List<NewsStory> Stories { get; set; }
         public int numberOfStories { get; set; }
+
+        public List<String> amalgamtedTitleWords { get; set; }
     }
 }
