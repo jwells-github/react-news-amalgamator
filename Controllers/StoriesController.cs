@@ -91,25 +91,27 @@ namespace react_news_app.Controllers
         }
         public List<AmalgamatedStory> amalgamateStories(List<AmalgamatedStory> alreadyAmalgamatedStories, List<NewsStory> storiesToAmalgamate)
         {
-            char[] charactersToTrim = new char[] { '"', '\'', '-', '?', '!', '`', ',', '.' };
+            char[] charactersToRemove = new char[] { '"', '\'', '-', '?', '!', '`', ',', '.', ':', '‘', '’', '–', '|' };
             List<AmalgamatedStory> amalgamatedStories = alreadyAmalgamatedStories;
             foreach(NewsStory story in storiesToAmalgamate)
             {
-                int highestMatchScore = 0;
+                string cleanedTitle = story.Title;
+                foreach (var c in charactersToRemove)
+                {
+                    cleanedTitle = cleanedTitle.Replace(c.ToString(), "");
+                }
+                float highestScore = 0f;
                 AmalgamatedStory highestMatchingStory = null;
                 foreach (AmalgamatedStory amalgamatedStory in amalgamatedStories)
                 {
-                    string[] storyTitle = story.Title.Trim(charactersToTrim).Split(" ");
-                    bool previousWordWasCapitalAndMatched = false;
-                    int matchScore = 0;
-                    int divisor = 4;
-                    int defaultMatchMin = 4;
-                    int matchMinimum = (storyTitle.Count() / divisor) >= defaultMatchMin ? storyTitle.Count() / divisor : defaultMatchMin;
-                    
+                    string[] storyTitle = cleanedTitle.Split(" ");
+                    bool previousWordMatches = false;
+                    float matchScore = 0f;
+                    float matchMinimum = 70f;
                     foreach (string word in storyTitle)
                     {
                         bool wordContainsCapitals = word.Any(char.IsUpper);
-                        if (word.Length < 4 && !wordContainsCapitals)
+                        if ((word.Length < 5 && !wordContainsCapitals) || word.Length <2)
                         {
                             continue;
                         }
@@ -118,43 +120,36 @@ namespace react_news_app.Controllers
                         
                         if (lowerMatch)
                         {
-                            int score = 2;
-                            if (directMatch)
+                            float s = previousWordMatches ? (100f / storyTitle.Length) * 4f : (100f / storyTitle.Length) * 2f;
+                            if (directMatch && wordContainsCapitals)
                             {
-                                score *= matchMinimum;
-                                score *= previousWordWasCapitalAndMatched ? 2 : 1;
-                                previousWordWasCapitalAndMatched = true;
+                                s *= 2; 
                             }
-                            else
-                            {
-                                previousWordWasCapitalAndMatched = false;
-                            }
-                            matchScore += score;
+                            matchScore += s;
+                            previousWordMatches = true;
                         }
                         else
                         {
-                            previousWordWasCapitalAndMatched = false;
-                            matchScore -= wordContainsCapitals ? matchMinimum -1: 1;
+                            previousWordMatches = false;
                         }
                     }
-                    if(matchScore >= matchMinimum && matchScore > highestMatchScore)
+                    if(matchScore >= matchMinimum && matchScore > highestScore)
                     {
                         highestMatchingStory = amalgamatedStory;
-                        highestMatchScore = matchScore;
+                        highestScore = matchScore;
                     }
                 }
-                story.highestMatchScore = highestMatchScore;
                 if(highestMatchingStory != null)
                 {
                     highestMatchingStory.Stories.Add(story);
                     highestMatchingStory.numberOfStories = highestMatchingStory.Stories.Count();
-                    highestMatchingStory.amalgamtedTitleWords.Union(story.Title.Trim(charactersToTrim).Split(" ").ToList());
+                    highestMatchingStory.amalgamtedTitleWords.Union(cleanedTitle.Split(" ").ToList());
                 }
                 else
                 {
                     AmalgamatedStory newAmalgamatedStory = new AmalgamatedStory
                     {
-                        amalgamtedTitleWords = story.Title.Trim(charactersToTrim).Split(" ").ToList()
+                        amalgamtedTitleWords = cleanedTitle.Split(" ").ToList()
                     };
                     newAmalgamatedStory.Stories.Add(story);
                     amalgamatedStories.Add(newAmalgamatedStory);
@@ -163,92 +158,7 @@ namespace react_news_app.Controllers
             return amalgamatedStories;
         }
 
-        /*
-         * 
-         * old Version
-         * 
-        public List<AmalgamatedStory> amalgamateStories(List<AmalgamatedStory> alreadyAmalgamatedStories, List<NewsStory> storiesToAmalgamate)
-        {
-            char[] charactersToTrim = new char[] { '"', '\'', '-', '?', '!', '`', ',', '.' };
-            List<AmalgamatedStory> amalgamatedStories = alreadyAmalgamatedStories;
-            foreach (NewsStory story in storiesToAmalgamate)
-            {
-                int highestMatchScore = 0;
-                AmalgamatedStory highestMatchingStory = null;
-                foreach (AmalgamatedStory amalgamatedStory in amalgamatedStories)
-                {
-                    string[] storyTitle = story.Title.Split(" ");   
-                    string[] storyDescription = story.Description.Split(" ");
-                    string[] amalgamatedTitle = amalgamatedStory.MasterTitle.Split(" ");
-                    string[] missing = storyTitle.Except(amalgamatedTitle).Concat(amalgamatedTitle.Except(storyTitle)).ToArray();
-                    bool previousWordWasCapitalAndMatched = false;
-                    int matchScore = 0;
-                    int divisor = 4;
-                    int defaultMatchMin = 4;
-                    int matchMinimum = (storyTitle.Count() / divisor) >= defaultMatchMin ? storyTitle.Count() / divisor : defaultMatchMin;
-                    foreach (string word in amalgamatedTitle)   
-                    {
-                        bool wordContainsCapitals = word.Any(char.IsUpper);
-                        if (word.Length < 4 && !wordContainsCapitals)
-                        {
-                            continue;
-                        }
-                        int indexTitleCaseSensitive = -1; // No match by default
-                        int indexTitleLowercase = Array.FindIndex(storyTitle, x => x.ToLower().Trim(charactersToTrim) == word.ToLower().Trim(charactersToTrim));
-                        int indexDescription = Array.FindIndex(storyDescription, x => x.ToLower().Trim(charactersToTrim) == word.ToLower().Trim(charactersToTrim));
-
-                        if (wordContainsCapitals)
-                        {
-                            indexTitleCaseSensitive = Array.FindIndex(storyTitle, x => x == word);
-                        }
-                        // The word exists in the title
-                        if (indexTitleLowercase > -1)
-                        {
-                            int score = matchMinimum / divisor;
-                            score *= indexTitleCaseSensitive > -1 ? 2 : 1;
-                            score *= previousWordWasCapitalAndMatched ? 2 : 1;
-                            matchScore += score;
-                            previousWordWasCapitalAndMatched = true;
-                        }
-                        // The word exists in the description
-                        else if(indexDescription > -1)
-                        {
-                            matchScore += matchMinimum / divisor;
-                        }
-                        else
-                        {
-                            matchScore -= wordContainsCapitals ? matchMinimum / 2: matchMinimum / divisor;
-                        }
-                    }
-                    if (matchScore >= matchMinimum && matchScore > highestMatchScore) 
-                    {
-                        highestMatchingStory = amalgamatedStory;
-                        highestMatchScore = matchScore;
-                    }
-                }
-                story.highestMatchScore = highestMatchScore;
-                if(highestMatchingStory != null)
-                {
-                    highestMatchingStory.Stories.Add(story);
-                    highestMatchingStory.numberOfStories = highestMatchingStory.Stories.Count();
-                }
-                else
-                {
-                    AmalgamatedStory newAmalgamatedStory = new AmalgamatedStory
-                    {
-                        MasterDescription = story.Description,
-                        MasterTitle = story.Title,
-                        MasterStoryUrl = story.StoryUrl,
-                    };
-                    newAmalgamatedStory.Stories.Add(story);
-                   
-                    amalgamatedStories.Add(newAmalgamatedStory);
-                }
-            }
-            return amalgamatedStories;
-        }
-
-        */
+   
     }
 }
 

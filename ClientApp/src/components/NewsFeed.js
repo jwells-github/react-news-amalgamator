@@ -33,11 +33,10 @@ export class NewsFeed extends Component {
         let sortMethod = this.state.sortMethod < numberOfSortMethods ? (this.state.sortMethod) + 1 : 1
         switch (sortMethod) {
             case 1:
-                this.setState({ filteredStories: this.sortStoriesByDate(this.state.filteredStories), sortText: "Sorting by Date" });
+                this.setState({ filteredStories: this.sortStoriesByChildCount(this.state.filteredStories), sortText: "Sorting by Number of Similiar Stories" });
                 break;
             case 2:
-                this.setState({
-                    filteredStories: this.sortStoriesByChildCount(this.state.filteredStories), sortText: "Sorting by Number of Similiar Stories"});
+                this.setState({ filteredStories: this.sortStoriesByDate(this.state.filteredStories), sortText: "Sorting by Date" });
                 break;
             default:
                 break;
@@ -88,8 +87,9 @@ export class NewsFeed extends Component {
         this.state.storyData.forEach(amalgamatedStory => {
             let mainStory;
             let childStories = [];
-            let chosenProviders = amalgamatedStory.stories.filter(story => {
-                let displayStory = true;;
+            // Filter out stories from unwanted providers
+            let chosenProviderStories = amalgamatedStory.stories.filter(story => {
+                let displayStory = true;
                 let providers = Object.values(this.props.providers)
                 providers.forEach(provider => {
                     if (provider.id === story.provider) {
@@ -98,8 +98,8 @@ export class NewsFeed extends Component {
                 })
                 return displayStory;
             });
-            let storiesAvailable = chosenProviders.length > 0;
-            chosenProviders.forEach(story => {
+            let storiesAvailable = chosenProviderStories.length > 0;
+            chosenProviderStories.forEach(story => {
                 if (story.provider === this.props.preferredProvider) {
                     mainStory = story
                 }
@@ -111,6 +111,7 @@ export class NewsFeed extends Component {
                 mainStory = childStories[0];
                 childStories.shift();
             }
+            // There are stories to display
             if (storiesAvailable) {
                 filteredStories.push({ mainStory: mainStory, childStories: childStories });
             }
